@@ -12,17 +12,23 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    try {
+      await account.deleteSession('current');
+    } catch (e) {
+     
+    }
     try {
       // 1. Cria a sessão
       await account.createEmailPasswordSession(email, password);
-      
+
       toast.success("Bem-vindo ao Auto Ultimate!");
 
       // a rodar o checkUser() de novo e liberar as rotas.
-      window.location.href = '/dashboard'; 
-      
+      window.location.href = '/dashboard';
+
     } catch (error) {
-      
+
       toast.error("Erro ao entrar: Verifique suas credenciais.");
       console.error(error);
     } finally {
@@ -33,7 +39,7 @@ export default function Login() {
     <div className="relative min-h-screen flex items-center justify-center bg-black">
       <div className="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=1920')" }} />
-      
+
       <div className="relative z-10 w-full max-w-md p-10 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl">
         <h1 className="text-3xl font-black text-white text-center tracking-tighter">AUTO ULTIMATE</h1>
         <form onSubmit={handleLogin} className="mt-8 space-y-6">

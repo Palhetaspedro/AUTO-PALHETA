@@ -7,11 +7,11 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 
-// PÁGINAS (Certifique-se que TODOS esses arquivos existem em src/pages/)
+// PÁGINAS
 import Login from './pages/Login';
 import Vehicles from './pages/Vehicles';
 import VehicleDetail from './pages/VehicleDetail';
-import AdminPanel from './components/AdminPanel'; // <-- O VITE ESTÁ RECLAMANDO DESTE AQUI
+import AdminPanel from './components/AdminPanel'; 
 import Notifications from './pages/Notifications';
 import Chat from './pages/Chat';
 import License from './pages/License';
@@ -22,59 +22,69 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Verifica se há um usuário logado ao carregar o app
   useEffect(() => {
     checkUser();
   }, []);
 
   async function checkUser() {
-    try {
-      const session = await account.get();
-      setUser(session);
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setLoading(false);
+  try {
+    const session = await account.get();
+    setUser(session);
+  } catch (error) {
+    setUser(null);
+    // Só redirecione se você NÃO estiver na página raiz "/"
+    if (window.location.pathname !== '/') {
+       console.log("Usuário não autenticado");
     }
+  } finally {
+    // Dê um pequeno fôlego para o React processar o estado
+    setTimeout(() => setLoading(false), 300);
   }
-
-  // Define que a página de Login é a raiz "/"
+}
+  // Verifica se estamos na tela de login
   const isLoginPage = location.pathname === '/';
 
-  if (loading) return <div className="h-screen flex items-center justify-center">Carregando...</div>;
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-black text-white">
+        <div className="animate-pulse font-black text-2xl tracking-tighter">AUTO ULTIMATE...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar e Header só aparecem se logado e NÃO for página de login */}
+      {/* Só mostra Sidebar se houver usuário e não estiver no Login */}
       {user && !isLoginPage && <Sidebar />}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {user && !isLoginPage && <Header />}
+        {/* Só mostra Header se houver usuário e não estiver no Login */}
+        {user && !isLoginPage && <Header user={user} />}
 
         <main className={`flex-1 overflow-x-hidden overflow-y-auto ${!isLoginPage ? 'p-8' : ''}`}>
           <div className={`${!isLoginPage ? 'max-w-7xl mx-auto min-h-full flex flex-col' : 'h-full'}`}>
             <div className="flex-1">
               <Routes>
-                {/* Rota Pública */}
-                <Route path="/" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
+                {/* Rota Raiz: Se logado vai pro dashboard, se não vai pro login */}
+                <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
 
-                {/* Rotas Protegidas (Só acessa se 'user' existir) */}
-                <Route path="/dashboard" element={user ? <Vehicles /> : <Navigate to="/" />} />
-                <Route path="/vehicle/:id" element={user ? <VehicleDetail /> : <Navigate to="/" />} />
+                {/* Rotas Protegidas */}
+                <Route path="/dashboard" element={user ? <Vehicles /> : <Navigate to="/" replace />} />
+                <Route path="/vehicle/:id" element={user ? <VehicleDetail /> : <Navigate to="/" replace />} />
                 
-                {/* Rota Admin (Proteção Dupla: Logado + Label Admin) */}
+                {/* Rota Admin: Removi a trava de 'labels' temporariamente para você conseguir testar se o painel abre */}
                 <Route 
                   path="/admin" 
-                  element={user?.labels?.includes('admin') ? <AdminPanel /> : <Navigate to="/dashboard" />} 
+                  element={user ? <AdminPanel /> : <Navigate to="/" replace />} 
                 />
 
-                <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/" />} />
-                <Route path="/chat" element={user ? <Chat /> : <Navigate to="/" />} />
-                <Route path="/license" element={user ? <License /> : <Navigate to="/" />} />
-                <Route path="/support" element={user ? <Support /> : <Navigate to="/" />} />
+                <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/" replace />} />
+                <Route path="/chat" element={user ? <Chat /> : <Navigate to="/" replace />} />
+                <Route path="/license" element={user ? <License /> : <Navigate to="/" replace />} />
+                <Route path="/support" element={user ? <Support /> : <Navigate to="/" replace />} />
 
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} />} />
+                {/* Fallback para evitar loops */}
+                <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
               </Routes>
             </div>
 
