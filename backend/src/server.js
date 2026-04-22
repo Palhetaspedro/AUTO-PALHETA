@@ -16,6 +16,9 @@ const vehicleRoutes = require('./routes/vehicles');
 app.use('/api/vehicles', vehicleRoutes);
 // app.use('/api/sales', salesRoutes); 
 
+app.get('/keep-alive', (req, res) => {
+  res.status(200).send('Servidor acordado!');
+});
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
