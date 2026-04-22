@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
+// Importa o controller
 const vehicleController = require('../controllers/vehicleController');
 
-// Rotas da API de Veículos
+// Define as rotas
 router.get('/', vehicleController.getAll);
-router.post('/', vehicleController.create); // Adicionar middleware de upload aqui depois
-// router.get('/:id', vehicleController.getById);
-// router.delete('/:id', vehicleController.delete);
+router.post('/', vehicleController.create);
 
 module.exports = router;

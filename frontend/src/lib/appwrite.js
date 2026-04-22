@@ -9,6 +9,7 @@ export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
 
+
 // IDs do seu projeto para usar no AdminPanel e outros lugares
 export const BUCKET_ID = '69e7ced80039eec2c8ba';
 export const DATABASE_ID = 'auto_ultimate_db';

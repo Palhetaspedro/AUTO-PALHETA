@@ -6,42 +6,44 @@ import { account } from './lib/appwrite';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
+import AddVehicleModal from './components/AddVehicleModal'; // Importe o Modal aqui
 
 // PÁGINAS
 import Login from './pages/Login';
 import Vehicles from './pages/Vehicles';
 import VehicleDetail from './pages/VehicleDetail';
-import AdminPanel from './components/AdminPanel'; 
 import Notifications from './pages/Notifications';
 import Chat from './pages/Chat';
 import License from './pages/License';
 import Support from './pages/Support';
+import Favourites from './pages/Favourites'; 
+import Recents from './pages/Recents';
+import Cart from './pages/Cart';
+import Profile from './pages/Profile'; // Importe o Perfil se existir
 
 export default function App() {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // 1. Estado para controlar a abertura do Modal de Cadastro
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     checkUser();
   }, []);
 
   async function checkUser() {
-  try {
-    const session = await account.get();
-    setUser(session);
-  } catch (error) {
-    setUser(null);
-    // Só redirecione se você NÃO estiver na página raiz "/"
-    if (window.location.pathname !== '/') {
-       console.log("Usuário não autenticado");
+    try {
+      const session = await account.get();
+      setUser(session);
+    } catch (error) {
+      setUser(null);
+    } finally {
+      setTimeout(() => setLoading(false), 300);
     }
-  } finally {
-    // Dê um pequeno fôlego para o React processar o estado
-    setTimeout(() => setLoading(false), 300);
   }
-}
-  // Verifica se estamos na tela de login
+
   const isLoginPage = location.pathname === '/';
 
   if (loading) {
@@ -54,36 +56,36 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Só mostra Sidebar se houver usuário e não estiver no Login */}
-      {user && !isLoginPage && <Sidebar />}
+      {/* 2. Passamos onOpenAdmin para a Sidebar abrir o modal */}
+      {user && !isLoginPage && (
+        <Sidebar onOpenAdmin={() => setIsModalOpen(true)} />
+      )}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Só mostra Header se houver usuário e não estiver no Login */}
         {user && !isLoginPage && <Header user={user} />}
 
         <main className={`flex-1 overflow-x-hidden overflow-y-auto ${!isLoginPage ? 'p-8' : ''}`}>
           <div className={`${!isLoginPage ? 'max-w-7xl mx-auto min-h-full flex flex-col' : 'h-full'}`}>
             <div className="flex-1">
               <Routes>
-                {/* Rota Raiz: Se logado vai pro dashboard, se não vai pro login */}
                 <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
 
                 {/* Rotas Protegidas */}
-                <Route path="/dashboard" element={user ? <Vehicles /> : <Navigate to="/" replace />} />
-                <Route path="/vehicle/:id" element={user ? <VehicleDetail /> : <Navigate to="/" replace />} />
+                <Route path="/dashboard" element={user ? <Vehicles user={user} /> : <Navigate to="/" replace />} />
+                <Route path="/vehicle/:id" element={user ? <VehicleDetail user={user} /> : <Navigate to="/" replace />} />
                 
-                {/* Rota Admin: Removi a trava de 'labels' temporariamente para você conseguir testar se o painel abre */}
-                <Route 
-                  path="/admin" 
-                  element={user ? <AdminPanel /> : <Navigate to="/" replace />} 
-                />
+                <Route path="/favourites" element={user ? <Favourites user={user} /> : <Navigate to="/" replace />} />
+                <Route path="/recents" element={user ? <Recents /> : <Navigate to="/" replace />} />
+                <Route path="/cart" element={user ? <Cart /> : <Navigate to="/" replace />} />
+                <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/" replace />} />
 
+                {/* Rota /admin removida pois agora usamos o Modal */}
+                
                 <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/" replace />} />
                 <Route path="/chat" element={user ? <Chat /> : <Navigate to="/" replace />} />
                 <Route path="/license" element={user ? <License /> : <Navigate to="/" replace />} />
                 <Route path="/support" element={user ? <Support /> : <Navigate to="/" replace />} />
 
-                {/* Fallback para evitar loops */}
                 <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
               </Routes>
             </div>
@@ -96,6 +98,16 @@ export default function App() {
           </div>
         </main>
       </div>
+
+      {/* 3. Renderização do Modal de Cadastro */}
+      <AddVehicleModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onRefresh={() => {
+          // Aqui você pode adicionar uma lógica para atualizar a lista de carros no dashboard
+          window.location.reload(); 
+        }}
+      />
     </div>
   );
 }

@@ -1,56 +1,93 @@
-import { useState } from 'react';
+import { Search, MapPin, Clock, Bell, User, CheckCheck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function AdminPanel() {
-  const [carData, setCarData] = useState({
-    brand: '', model: '', price: 0, color: '#000000', transmission: 'Automatic'
-  });
+export default function Header({ user }) {
+  const [time, setTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  const [searchValue, setSearchValue] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const navigate = useNavigate();
+
+  const notifications = [
+    { id: 1, text: "Bem-vindo ao painel de controle.", time: "Agora" },
+    { id: 2, text: "Sua sessão expira em 24h.", time: "1h atrás" }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <div className="p-8 space-y-8">
-      <h1 className="text-3xl font-bold">Painel do Administrador</h1>
+    <header className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Formulário de Cadastro */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
-          <h2 className="text-xl font-bold">Adicionar Novo Veículo</h2>
-          <input type="text" placeholder="Marca" className="w-full p-3 border rounded-xl" />
-          <input type="text" placeholder="Modelo" className="w-full p-3 border rounded-xl" />
-          <div className="flex gap-4">
-            <input type="number" placeholder="Preço/h" className="flex-1 p-3 border rounded-xl" />
-            <select className="p-3 border rounded-xl">
-              <option>Automático</option>
-              <option>Manual</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-4">
-            <span>Cor do Veículo:</span>
-            <input 
-              type="color" 
-              value={carData.color} 
-              onChange={(e) => setCarData({...carData, color: e.target.value})}
-              className="w-16 h-10 rounded-lg cursor-pointer" 
-            />
-          </div>
-          <button className="w-full py-4 bg-black text-white font-bold rounded-xl">Salvar Veículo</button>
-        </div>
-
-        {/* Preview ao Vivo */}
-        <div className="bg-gray-900 p-6 rounded-3xl flex flex-col items-center justify-center text-white overflow-hidden relative">
-          <p className="absolute top-4 left-4 text-xs uppercase tracking-widest opacity-50">Preview em Tempo Real</p>
-          
-          {/* O Carro que muda de cor via CSS filter ou overlay */}
-          <div className="w-64 h-40 bg-contain bg-no-repeat bg-center transition-all duration-500"
-               style={{ 
-                 backgroundImage: "url('SUA_URL_DE_CARRO_SEM_FUNDO')", 
-                 backgroundColor: carData.color,
-                 maskImage: "url('SUA_URL_DE_CARRO_SEM_FUNDO')",
-                 WebkitMaskImage: "url('SUA_URL_DE_CARRO_SEM_FUNDO')"
-               }}>
-          </div>
-          <h3 className="text-2xl font-black mt-4">{carData.brand || 'Marca'} {carData.model || 'Modelo'}</h3>
-          <p className="text-xl font-light">R$ {carData.price || '0'},00 /hora</p>
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-2 rounded-2xl border border-gray-200/50">
+          <MapPin size={16} className="text-blue-600" />
+          <span className="text-[13px] font-black text-black italic">BRASÍLIA, DF</span>
         </div>
       </div>
-    </div>
+
+      <div className="hidden md:flex items-center relative w-full max-w-md mx-8 group">
+        <div className="relative flex items-center w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-white focus-within:border-black transition-all shadow-inner">
+          <Search size={18} className="text-gray-400" />
+          <input 
+            type="text" 
+            placeholder="Pesquisar máquina..." 
+            className="bg-transparent border-none outline-none ml-3 text-[13px] font-bold w-full focus:ring-0"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        {/* Notificações */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className={`p-2.5 rounded-xl transition-all ${showNotifications ? 'bg-black text-white' : 'bg-gray-50 text-gray-400'}`}
+          >
+            <Bell size={20} />
+          </button>
+          {showNotifications && (
+            <div className="absolute right-0 mt-3 w-80 bg-white rounded-[2rem] shadow-2xl border border-gray-100 p-5 animate-in fade-in slide-in-from-top-2">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-black text-xs uppercase tracking-widest text-gray-400">Notificações</h3>
+                <CheckCheck size={16} className="text-blue-500" />
+              </div>
+              <div className="space-y-2">
+                {notifications.map(n => (
+                  <div key={n.id} className="p-3 bg-gray-50 rounded-2xl hover:bg-blue-50 transition-colors cursor-pointer">
+                    <p className="text-xs font-bold text-gray-800">{n.text}</p>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase">{n.time}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Perfil - Rota corrigida para /profile */}
+        <div 
+          onClick={() => navigate('/profile')} 
+          className="flex items-center gap-4 pl-4 border-l border-gray-100 cursor-pointer group active:scale-95 transition-all"
+        >
+          <div className="text-right hidden sm:block">
+            <p className="text-[11px] font-black text-black uppercase leading-none tracking-tighter group-hover:text-blue-600 transition-colors">
+              {user?.name || 'Gestor Master'}
+            </p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1 bg-gray-50 px-2 py-0.5 rounded-md">
+              Configurações
+            </p>
+          </div>
+          <div className="h-11 w-11 bg-gradient-to-br from-black via-gray-800 to-black rounded-2xl flex items-center justify-center text-white shadow-lg border-2 border-white ring-1 ring-gray-100">
+            <User size={22} strokeWidth={1.5} />
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }

@@ -1,79 +1,150 @@
-import { Search, MapPin, Filter, Star } from 'lucide-react';
+import { Search, Filter, X, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { databases, DATABASE_ID, COLLECTION_ID } from '../lib/appwrite';
+import VehicleCard from '../components/VehicleCard';
 
-const mockVehicles = [
-  { id: '1', brand: 'BMW', model: 'M4 Competition', year: 2024, color: 'Verde Ilha de Man', price_per_hour: 150.0, image_url: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=800&auto=format&fit=crop' },
-  { id: '2', brand: 'Porsche', model: '911 Carrera', year: 2023, color: 'Prata', price_per_hour: 200.0, image_url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=800&auto=format&fit=crop' },
-  { id: '3', brand: 'Audi', model: 'RS e-tron GT', year: 2024, color: 'Preto', price_per_hour: 120.0, image_url: 'https://images.unsplash.com/photo-1614200187524-dc4b892acf16?q=80&w=800&auto=format&fit=crop' },
-];
+export default function Vehicles({ user }) {
+  const [vehicles, setVehicles] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  
+  // Estados para os filtros específicos do seu sistema
+  const [filters, setFilters] = useState({
+    type: '',
+    transmission: '',
+    fuel: ''
+  });
 
-export default function Vehicles() {
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+        setVehicles(response.documents);
+      } catch (error) {
+        console.error("Erro ao buscar veículos:", error);
+      }
+    };
+    fetchVehicles();
+  }, []);
+
+  // Lógica de filtro avançada
+  const filteredVehicles = vehicles.filter(v => {
+    const matchesSearch = v.brand?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          v.model?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filters.type === '' || v.vehicleType === filters.type;
+    const matchesTrans = filters.transmission === '' || v.Transmission === filters.transmission;
+    const matchesFuel = filters.fuel === '' || v.fuel_type === filters.fuel;
+
+    return matchesSearch && matchesType && matchesTrans && matchesFuel;
+  });
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 animate-in fade-in duration-700">
       
       {/* Hero Section */}
-      <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between gap-6">
-        <div>
-          <span className="text-sm font-bold tracking-widest text-gray-400 uppercase">Premium Fleet</span>
-          <h1 className="text-4xl font-extrabold text-gray-950 mt-2 tracking-tight">
-            Descubra o carro perfeito.
-          </h1>
-          <p className="text-gray-500 mt-3 max-w-xl text-lg">
-            Sua próxima jornada começa aqui. Alugue veículos exclusivos com total transparência e segurança.
-          </p>
+      <div className="relative h-[350px] w-full rounded-[3rem] overflow-hidden shadow-2xl group">
+        <img 
+          src="https://images.unsplash.com/photo-1530268578403-bf6e89800e70?q=80&w=1600&auto=format&fit=crop" 
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+          alt="" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex items-center p-12">
+          <div className="max-w-2xl space-y-4">
+            <h1 className="text-5xl font-black text-white leading-tight tracking-tighter">
+              DOMINE A ESTRADA <br /> 
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-500">
+                SOB QUALQUER CONDIÇÃO.
+              </span>
+            </h1>
+            <p className="text-gray-300 text-lg font-medium max-w-md">
+              Veículos de alta performance preparados para elevar sua jornada, faça chuva ou faça sol.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Buscar marca, modelo ou categoria..." 
-            className="w-full pl-12 pr-4 py-3 bg-transparent border-none focus:ring-0 text-gray-900 placeholder-gray-400 font-medium" 
-          />
+      {/* Barra de Busca e Filtro */}
+      <div className="relative space-y-4">
+        <div className="flex items-center gap-4 bg-white p-4 rounded-[2rem] shadow-xl shadow-gray-100 border border-gray-50">
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+            <input 
+              type="text" 
+              placeholder="Qual máquina você procura hoje?" 
+              className="w-full pl-12 pr-4 py-3 bg-transparent border-none focus:ring-0 text-gray-900 placeholder-gray-400 font-bold text-lg"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button 
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black transition-all active:scale-95 ${isFilterOpen ? 'bg-blue-600 text-white' : 'bg-black text-white'}`}
+          >
+            {isFilterOpen ? <X size={20} /> : <Filter size={20} />}
+            FILTRAR
+          </button>
         </div>
-        <div className="h-8 w-px bg-gray-200"></div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition">
-          <Filter className="w-4 h-4" />
-          Filtros
-        </button>
-      </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {mockVehicles.map(vehicle => (
-          <div key={vehicle.id} className="group bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-            <div className="relative h-56 w-full overflow-hidden bg-gray-100">
-              <img 
-                src={vehicle.image_url} 
-                alt={`${vehicle.brand} ${vehicle.model}`} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
-                <Star className="w-3.5 h-3.5 text-black fill-black" />
-                <span className="text-sm font-bold text-gray-900">5.0</span>
-              </div>
+        {/* Menu de Filtros (Dropdwon) */}
+        {isFilterOpen && (
+          <div className="absolute z-20 w-full bg-white mt-2 p-6 rounded-[2rem] shadow-2xl border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6 animate-in slide-in-from-top-4 duration-300">
+            <div>
+              <label className="block text-xs font-black text-gray-400 uppercase mb-2 tracking-widest">Tipo de Veículo</label>
+              <select 
+                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500"
+                value={filters.type}
+                onChange={(e) => setFilters({...filters, type: e.target.value})}
+              >
+                <option value="">Todos os Tipos</option>
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="Sport">Sport</option>
+                <option value="Luxury">Luxury</option>
+              </select>
             </div>
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-950 tracking-tight">{vehicle.brand} {vehicle.model}</h3>
-                  <p className="text-sm text-gray-500 font-medium mt-1">{vehicle.year} • {vehicle.color}</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-4">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-black text-gray-950">R$ {vehicle.price_per_hour.toFixed(2)}</span>
-                  <span className="text-sm font-medium text-gray-500">/h</span>
-                </div>
-                <button className="px-5 py-2.5 bg-black text-white rounded-xl font-semibold text-sm hover:bg-gray-800 transition">
-                  Reservar
-                </button>
-              </div>
+
+            <div>
+              <label className="block text-xs font-black text-gray-400 uppercase mb-2 tracking-widest">Transmissão</label>
+              <select 
+                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500"
+                value={filters.transmission}
+                onChange={(e) => setFilters({...filters, transmission: e.target.value})}
+              >
+                <option value="">Qualquer Câmbio</option>
+                <option value="Automatic">Automático</option>
+                <option value="Manual">Manual</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-black text-gray-400 uppercase mb-2 tracking-widest">Combustível</label>
+              <select 
+                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500"
+                value={filters.fuel}
+                onChange={(e) => setFilters({...filters, fuel: e.target.value})}
+              >
+                <option value="">Todos</option>
+                <option value="Gasoline">Gasolina</option>
+                <option value="Electric">Elétrico</option>
+                <option value="Hybrid">Híbrido</option>
+              </select>
             </div>
           </div>
-        ))}
+        )}
+      </div>
+
+      {/* Grid de Veículos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+        {filteredVehicles.length > 0 ? (
+          filteredVehicles.map(vehicle => (
+            <VehicleCard key={vehicle.$id} vehicle={vehicle} user={user} />
+          ))
+        ) : (
+          <div className="col-span-full text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+            <p className="text-gray-400 font-bold text-xl uppercase tracking-tighter">Nenhum veículo Disponível. :(</p>
+            
+          </div>
+        )}
       </div>
     </div>
   );

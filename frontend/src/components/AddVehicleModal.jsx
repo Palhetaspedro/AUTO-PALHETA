@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, Upload, Loader2 } from 'lucide-react';
-import { uploadVehicleImage } from '../services/appwrite';
+import { uploadVehicleImage } from '../lib/appwrite';
 import axios from 'axios';
 
 export default function AddVehicleModal({ isOpen, onClose, onRefresh }) {
@@ -81,7 +81,7 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh }) {
           </div>
 
           <button type="submit" disabled={loading} className="w-full bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-900 transition-all">
-            {loading ? <Loader2 className="animate-spin" /> : "Cadastrar na Frota"}
+            {loading ? <Loader2 className="animate-spin" /> : "Cadastrar Veículo"}
           </button>
         </form>
       </div>
