@@ -24,13 +24,19 @@ export const uploadVehicleImage = async (file) => {
       file
     );
     
-    // Gera a URL de visualização da imagem
-    const result = storage.getFilePreview(BUCKET_ID, uploadedFile.$id);
-    return { url: result.href, fileId: uploadedFile.$id };
+    // CONSTRUÇÃO MANUAL DA URL (Mais segura)
+    // Usamos o seu endpoint e IDs definidos no topo do arquivo
+    const projectID = '69e6d29f00174d22b7b6';
+    const endpoint = 'https://sfo.cloud.appwrite.io/v1';
+    
+    const fileUrl = `${endpoint}/storage/buckets/${BUCKET_ID}/files/${uploadedFile.$id}/view?project=${projectID}`;
+    
+    console.log("URL Construída:", fileUrl);
+    
+    return { url: fileUrl, fileId: uploadedFile.$id };
   } catch (error) {
     console.error("Erro no upload:", error);
     throw error;
   }
 };
-
 export { client, ID };
