@@ -1,90 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Upload, Loader2 } from 'lucide-react';
 import { uploadVehicleImage } from '../lib/appwrite';
 import axios from 'axios';
 
-export default function AddVehicleModal({ isOpen, onClose, onRefresh }) {
+export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = null }) {
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [formData, setFormData] = useState({
-    brand: '', model: '', year: 2024, price_per_hour: '', fuel_type: 'Gasoline'
-  });
+
+  const initialForm = {
+    brand: '', model: '', year: 2026, price_per_hour: '',
+    fuel_type: 'Gasoline', transmission: 'Automatic',
+    color: 'Black', vin: '', vehicleType: 'sedan'
+  };
+
+  const [formData, setFormData] = useState(initialForm);
+
+  // Preenche o form se for edição, limpa se for novo
+  useEffect(() => {
+    if (vehicle && isOpen) {
+      setFormData({
+        brand: vehicle.brand || '',
+        model: vehicle.model || '',
+        year: vehicle.year || 2026,
+        price_per_hour: vehicle.price_per_hour || '',
+        fuel_type: vehicle.fuel_type || 'Gasoline',
+        transmission: vehicle.Transmission || 'Automatic',
+        color: vehicle.color || 'Black',
+        vin: vehicle.vin || '',
+        vehicleType: vehicle.vehicleType || 'sedan'
+      });
+      setImagePreview(vehicle.image_url || null);
+    } else if (!vehicle && isOpen) {
+      setFormData(initialForm);
+      setImagePreview(null);
+    }
+  }, [vehicle, isOpen]);
 
   if (!isOpen) return null;
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      let imageUrl = '';
+      let imageUrl = imagePreview;
       if (selectedFile) {
         const uploadResult = await uploadVehicleImage(selectedFile);
         imageUrl = uploadResult.url;
       }
 
-      // Enviando para o seu Backend Node (que configuramos na resposta anterior para Appwrite)
-      await axios.post('http://localhost:3001/api/vehicles', {
-        ...formData,
-        image_url: imageUrl,
-        is_available: true
-      });
+      const payload = { ...formData, year: Number(formData.year), price_per_hour: Math.round(Number(formData.price_per_hour)), image_url: imageUrl };
+
+      if (vehicle?.$id) {
+        await axios.put(`http://localhost:3001/api/vehicles/${vehicle.$id}`, payload);
+      } else {
+        await axios.post('http://localhost:3001/api/vehicles', payload);
+      }
 
       onRefresh();
       onClose();
     } catch (err) {
-      alert("Erro ao salvar no Appwrite");
+      alert(err.response?.data?.error || "Erro na operação");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
-        <div className="p-6 border-b flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-800">Novo Veículo (Appwrite)</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Área de Drop/Upload */}
-          <div className="relative h-40 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 flex flex-col items-center justify-center overflow-hidden">
-            {imagePreview ? (
-              <img src={imagePreview} className="w-full h-full object-cover" />
-            ) : (
-              <label className="flex flex-col items-center cursor-pointer">
-                <Upload className="text-gray-400 mb-2" />
-                <span className="text-sm text-gray-500">Foto do veículo</span>
-                <input type="file" className="hidden" onChange={handleFileChange} />
-              </label>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <input type="text" placeholder="Marca" className="border p-3 rounded-xl outline-none focus:ring-2 ring-black"
-              onChange={e => setFormData({...formData, brand: e.target.value})} required />
-            <input type="text" placeholder="Modelo" className="border p-3 rounded-xl outline-none focus:ring-2 ring-black"
-              onChange={e => setFormData({...formData, model: e.target.value})} required />
-            <input type="number" placeholder="Ano" className="border p-3 rounded-xl"
-              onChange={e => setFormData({...formData, year: e.target.value})} />
-            <input type="number" placeholder="Preço/Hora" className="border p-3 rounded-xl"
-              onChange={e => setFormData({...formData, price_per_hour: e.target.value})} required />
-          </div>
-
-          <button type="submit" disabled={loading} className="w-full bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-900 transition-all">
-            {loading ? <Loader2 className="animate-spin" /> : "Cadastrar Veículo"}
-          </button>
-        </form>
-      </div>
+    // ... (restante do JSX do modal que você já tem)
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+       {/* Conteúdo do seu form aqui */}
     </div>
   );
 }

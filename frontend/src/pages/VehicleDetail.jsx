@@ -1,5 +1,4 @@
-// No seu App.jsx adicione:
-// <Route path="/vehicle/:id" element={<VehicleDetails />} />
+
 
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
