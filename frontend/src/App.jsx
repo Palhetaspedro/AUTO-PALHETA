@@ -6,7 +6,7 @@ import { account } from './lib/appwrite';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
-import AddVehicleModal from './components/AddVehicleModal'; // Importe o Modal aqui
+import AddVehicleModal from './components/AddVehicleModal'; 
 
 // PÁGINAS
 import Login from './pages/Login';
@@ -15,11 +15,12 @@ import VehicleDetail from './pages/VehicleDetail';
 import Notifications from './pages/Notifications';
 import Chat from './pages/Chat';
 import License from './pages/License';
-import Support from './pages/Support';
 import Favourites from './pages/Favourites'; 
 import Recents from './pages/Recents';
 import Cart from './pages/Cart';
-import Profile from './pages/Profile'; // Importe o Perfil se existir
+import Profile from './pages/Profile'; 
+import SalesStats from './pages/SalesStats'; // Importação confirmada
+
 
 export default function App() {
   const location = useLocation();
@@ -79,12 +80,13 @@ export default function App() {
                 <Route path="/cart" element={user ? <Cart /> : <Navigate to="/" replace />} />
                 <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/" replace />} />
 
-                {/* Rota /admin removida pois agora usamos o Modal */}
+                {/* ADICIONADO: Rota de Estatísticas / Visão de Negócio */}
+                <Route path="/sales-stats" element={user ? <SalesStats /> : <Navigate to="/" replace />} />
                 
                 <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/" replace />} />
                 <Route path="/chat" element={user ? <Chat /> : <Navigate to="/" replace />} />
                 <Route path="/license" element={user ? <License /> : <Navigate to="/" replace />} />
-                <Route path="/support" element={user ? <Support /> : <Navigate to="/" replace />} />
+                
 
                 <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
               </Routes>
@@ -104,7 +106,7 @@ export default function App() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onRefresh={() => {
-          // Aqui você pode adicionar uma lógica para atualizar a lista de carros no dashboard
+          // Atualiza a página para refletir novos carros na lista
           window.location.reload(); 
         }}
       />

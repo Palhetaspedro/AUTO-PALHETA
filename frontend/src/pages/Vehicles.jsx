@@ -31,6 +31,8 @@ export default function Vehicles({ user }) {
   const filteredVehicles = vehicles.filter(v => {
     const matchesSearch = v.brand?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           v.model?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // CORREÇÃO: Comparação direta com os valores em minúsculo do banco
     const matchesType = filters.type === '' || v.vehicleType === filters.type;
     const matchesTrans = filters.transmission === '' || v.Transmission === filters.transmission;
     const matchesFuel = filters.fuel === '' || v.fuel_type === filters.fuel;
@@ -78,7 +80,7 @@ export default function Vehicles({ user }) {
           </div>
           <button 
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black transition-all active:scale-95 ${isFilterOpen ? 'bg-blue-600 text-white' : 'bg-black text-white'}`}
+            className={`flex items-center gap-3 px-8 py-4 rounded-3xl font-black transition-all active:scale-95 ${isFilterOpen ? 'bg-blue-600 text-white' : 'bg-black text-white'}`}
           >
             {isFilterOpen ? <X size={20} /> : <Filter size={20} />}
             FILTRAR
@@ -96,10 +98,12 @@ export default function Vehicles({ user }) {
                 onChange={(e) => setFilters({...filters, type: e.target.value})}
               >
                 <option value="">Todos os Tipos</option>
-                <option value="Sedan">Sedan</option>
-                <option value="SUV">SUV</option>
-                <option value="Sport">Sport</option>
-                <option value="Luxury">Luxury</option>
+                {/* AJUSTADO: value agora em minúsculo para bater com o banco */}
+                <option value="sedan">Sedan</option>
+                <option value="suv">SUV</option>
+                <option value="coupe">Coupe / Sport</option>
+                <option value="hatchback">Hatchback</option>
+                <option value="truck">Truck</option>
               </select>
             </div>
 
@@ -126,7 +130,7 @@ export default function Vehicles({ user }) {
                 <option value="">Todos</option>
                 <option value="Gasoline">Gasolina</option>
                 <option value="Electric">Elétrico</option>
-                <option value="Hybrid">Híbrido</option>
+                <option value="etc">Outros</option>
               </select>
             </div>
           </div>
@@ -142,7 +146,6 @@ export default function Vehicles({ user }) {
         ) : (
           <div className="col-span-full text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
             <p className="text-gray-400 font-bold text-xl uppercase tracking-tighter">Nenhum veículo Disponível. :(</p>
-            
           </div>
         )}
       </div>
