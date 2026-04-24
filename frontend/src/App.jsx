@@ -73,7 +73,6 @@ export default function App() {
                 <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/" replace />} />
                 <Route path="/sales-stats" element={user ? <SalesStats /> : <Navigate to="/" replace />} />
                 <Route path="/notifications" element={user ? <Notifications /> : <Navigate to="/" replace />} />
-                <Route path="/chat" element={user ? <Chat /> : <Navigate to="/" replace />} />
                 <Route path="/license" element={user ? <License /> : <Navigate to="/" replace />} />
                 <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
               </Routes>
