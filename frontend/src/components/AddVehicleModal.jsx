@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Upload, Loader2, CarFront, Tag, Fuel, Settings, Hash } from 'lucide-react';
 import { uploadVehicleImage } from '../lib/appwrite';
-import { ADMIN_EMAIL } from '../config';
 import axios from 'axios';
 
 export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = null }) {

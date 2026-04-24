@@ -1,21 +1,20 @@
 import { Client, Account, Databases, Storage, ID } from 'appwrite';
 
-const client = new Client()
-    .setEndpoint('https://sfo.cloud.appwrite.io/v1')
-    .setProject('69e6d29f00174d22b7b6');
+const PROJECT_ID = '69e6d29f00174d22b7b6';
+const ENDPOINT = 'https://sfo.cloud.appwrite.io/v1';
 
-// Exportando os serviços
+const client = new Client()
+    .setEndpoint(ENDPOINT)
+    .setProject(PROJECT_ID);
+
 export const account = new Account(client); 
 export const databases = new Databases(client);
 export const storage = new Storage(client);
 
-
-// IDs do seu projeto para usar no AdminPanel e outros lugares
 export const BUCKET_ID = '69e7ced80039eec2c8ba';
 export const DATABASE_ID = 'auto_ultimate_db';
 export const COLLECTION_ID = 'vehicles_coll';
 
-// Função utilitária para upload de imagens
 export const uploadVehicleImage = async (file) => {
   try {
     const uploadedFile = await storage.createFile(
@@ -24,12 +23,7 @@ export const uploadVehicleImage = async (file) => {
       file
     );
     
-    // CONSTRUÇÃO MANUAL DA URL (Mais segura)
-    // Usamos o seu endpoint e IDs definidos no topo do arquivo
-    const projectID = '69e6d29f00174d22b7b6';
-    const endpoint = 'https://sfo.cloud.appwrite.io/v1';
-    
-    const fileUrl = `${endpoint}/storage/buckets/${BUCKET_ID}/files/${uploadedFile.$id}/view?project=${projectID}`;
+   const fileUrl = `${endpoint}/storage/buckets/${BUCKET_ID}/files/${uploadedFile.$id}/view?project=${PROJECT_ID}`;
     
     console.log("URL Construída:", fileUrl);
     
@@ -39,4 +33,5 @@ export const uploadVehicleImage = async (file) => {
     throw error;
   }
 };
+
 export { client, ID };

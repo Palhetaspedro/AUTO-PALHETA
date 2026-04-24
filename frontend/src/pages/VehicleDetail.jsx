@@ -3,13 +3,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2, Fuel, Calendar, Settings, CheckCircle2, Box, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
+import { useAdmin } from '../hooks/useAdmin';
+
 export default function VehicleDetail({ user }) {
-  const { id } = useParams();
+  const { id } = useParams(); 
+  const isAdmin = useAdmin();
   const navigate = useNavigate();
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAdded, setIsAdded] = useState(false);
   const [deleting, setDeleting] = useState(false);
+ 
 
   // URL da API (Ajustada para o seu Northflank)
   const API_URL = import.meta.env.VITE_API_URL || "https://palheta--auto-ultimatebackend--jyc2t58tq8fd.code.run";

@@ -2,10 +2,11 @@ import { Car, LogOut, Clock, LayoutDashboard, ShieldCheck, ShoppingCart, Bell, B
 import { Link, useLocation } from 'react-router-dom';
 import { account, client } from '../lib/appwrite';
 import { useState, useEffect, useRef } from 'react';
-
+import { useAdmin } from '../hooks/useAdmin';
 
 export default function Sidebar({ onOpenAdmin }) {
   const location = useLocation();
+  const isAdmin = useAdmin();
   const [cartCount, setCartCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -104,13 +105,15 @@ export default function Sidebar({ onOpenAdmin }) {
           )}
         </div>
 
-        <button
-          onClick={onOpenAdmin}
-          className="w-full group flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 text-gray-600 hover:bg-white hover:shadow-md hover:text-orange-600 focus:outline-none border border-transparent hover:border-gray-100"
-        >
-          <ShieldCheck className="w-5 h-5 text-orange-600 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
-          <span>Painel Admin</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={onOpenAdmin}
+            className="w-full group flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 text-gray-600 hover:bg-white hover:shadow-md hover:text-orange-600 focus:outline-none border border-transparent hover:border-gray-100"
+          >
+            <ShieldCheck className="w-5 h-5 text-orange-600 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+            <span>Painel Admin</span>
+          </button>
+        )}
 
         <SidebarLink
           icon={BarChart3}
