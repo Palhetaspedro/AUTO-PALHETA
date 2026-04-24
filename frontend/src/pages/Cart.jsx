@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Trash2, ArrowRight, CheckCircle2, CreditCard, Loader2, Star } from 'lucide-react';
+import { ShoppingCart, Trash2, CheckCircle2, CreditCard, Loader2, Star } from 'lucide-react';
 import { databases, DATABASE_ID } from '../lib/appwrite';
 import { ID } from 'appwrite';
 
@@ -19,7 +19,7 @@ export default function Cart({ user }) {
   }, []);
 
   const removeItem = (id) => {
-    const updatedCart = cartItems.filter(item => item.$id !== id);
+    const updatedCart = cartItems.filter(item => (item.$id || item.id) !== id);
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
@@ -30,8 +30,8 @@ export default function Cart({ user }) {
 
   const handleCheckout = async () => {
     if (!user?.$id) {
-        alert("Você precisa estar logado para finalizar o aluguel.");
-        return;
+      alert("Você precisa estar logado para finalizar o aluguel.");
+      return;
     }
 
     setPaymentStep('processing');
@@ -41,14 +41,13 @@ export default function Cart({ user }) {
       const newDocIds = [];
 
       for (const item of cartItems) {
-        // Payload corrigido com 'creditCard' (sem underline)
         const payload = {
           transactionId: ID.unique(), 
           salesPersonId: String(user.$id), 
           saleDate: new Date().toISOString(), 
-          finalPrice: Number(item.price_per_hour), 
-          paymentMethod: "creditCard", // VALOR EXATO DA SUA IMAGEM image_356122.png
-          customerFeedbackRating: null, // Deixando nulo inicialmente conforme sua tabela image_34f449.png
+          finalPrice: Number(item.price || item.price_per_hour), // CORRIGIDO
+          paymentMethod: "creditCard",
+          customerFeedbackRating: null,
           discountApplied: false 
         };
 
@@ -60,12 +59,11 @@ export default function Cart({ user }) {
         );
         newDocIds.push(response.$id);
 
-        // Atualiza o estoque
         try {
           await databases.updateDocument(
             DATABASE_ID,
             VEHICLES_COLLECTION_ID,
-            item.$id,
+            item.$id || item.id, // CORRIGIDO
             { stock: Math.max(0, Number(item.stock || 0) - 1) }
           );
         } catch (e) {
@@ -95,7 +93,7 @@ export default function Cart({ user }) {
           DATABASE_ID,
           SALES_COLLECTION_ID,
           docId,
-          { customerFeedbackRating: String(rating) } // Usando o nome da coluna da imagem image_34f449.png
+          { customerFeedbackRating: String(rating) }
         );
       }
       alert("Avaliação enviada com sucesso!");
@@ -108,7 +106,6 @@ export default function Cart({ user }) {
     }
   };
 
-  // --- RENDERS ---
   if (paymentStep === 'processing') {
     return (
       <div className="flex flex-col items-center justify-center py-40 animate-pulse">
@@ -164,15 +161,15 @@ export default function Cart({ user }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-4">
             {cartItems.map((item) => (
-              <div key={item.$id} className="flex items-center justify-between bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+              <div key={item.$id || item.id} className="flex items-center justify-between bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                 <div className="flex items-center gap-4">
                   <img src={item.image_url} className="w-24 h-16 object-cover rounded-2xl" alt={item.model} />
                   <div>
                     <h3 className="font-black uppercase text-xs text-gray-900">{item.brand} {item.model}</h3>
-                    <p className="text-blue-600 font-black text-sm">US$ {formatPrice(item.price_per_hour)}/h</p>
+                    <p className="text-blue-600 font-black text-sm">US$ {formatPrice(item.price || item.price_per_hour)}/h</p>
                   </div>
                 </div>
-                <button onClick={() => removeItem(item.$id)} className="p-3 text-red-400 hover:text-red-600">
+                <button onClick={() => removeItem(item.$id || item.id)} className="p-3 text-red-400 hover:text-red-600">
                   <Trash2 size={18} />
                 </button>
               </div>
@@ -180,16 +177,16 @@ export default function Cart({ user }) {
           </div>
           
           <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl h-fit">
-              <h2 className="font-black text-sm mb-6 italic uppercase tracking-widest text-gray-400">Resumo</h2>
-              <div className="pt-4 border-t border-gray-100 flex justify-between items-center mb-8">
-                <span className="font-black uppercase text-xs tracking-widest">Total</span>
-                <span className="text-2xl font-black tracking-tighter">
-                   US$ {formatPrice(cartItems.reduce((acc, item) => acc + Number(item.price_per_hour), 0))}
-                </span>
-              </div>
-              <button onClick={handleCheckout} className="w-full py-5 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3">
-                Finalizar Pagamento <CreditCard size={18} />
-              </button>
+            <h2 className="font-black text-sm mb-6 italic uppercase tracking-widest text-gray-400">Resumo</h2>
+            <div className="pt-4 border-t border-gray-100 flex justify-between items-center mb-8">
+              <span className="font-black uppercase text-xs tracking-widest">Total</span>
+              <span className="text-2xl font-black tracking-tighter">
+                US$ {formatPrice(cartItems.reduce((acc, item) => acc + Number(item.price || item.price_per_hour), 0))}
+              </span>
+            </div>
+            <button onClick={handleCheckout} className="w-full py-5 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3">
+              Finalizar Pagamento <CreditCard size={18} />
+            </button>
           </div>
         </div>
       )}
