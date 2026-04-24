@@ -1,7 +1,8 @@
 import { Client, Account, Databases, Storage, ID } from 'appwrite';
 
-const PROJECT_ID = '69e6d29f00174d22b7b6';
-const ENDPOINT = 'https://sfo.cloud.appwrite.io/v1';
+
+export const ENDPOINT = 'https://sfo.cloud.appwrite.io/v1';
+export const PROJECT_ID = '69e6d29f00174d22b7b6';
 
 const client = new Client()
     .setEndpoint(ENDPOINT)
@@ -20,10 +21,11 @@ export const uploadVehicleImage = async (file) => {
     const uploadedFile = await storage.createFile(
       BUCKET_ID,
       ID.unique(),
-      file
+      file,
+      [] 
     );
     
-   const fileUrl = `${endpoint}/storage/buckets/${BUCKET_ID}/files/${uploadedFile.$id}/view?project=${PROJECT_ID}`;
+   const fileUrl = `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${uploadedFile.$id}/view?project=${PROJECT_ID}`;
     
     console.log("URL Construída:", fileUrl);
     
