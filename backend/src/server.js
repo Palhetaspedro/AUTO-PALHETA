@@ -14,8 +14,9 @@ const PORT = process.env.PORT || 3001;
 
 // Configuração de CORS aberta para o seu Frontend conseguir acessar
 app.use(cors({
-  origin: ['https://auto-palheta.vercel.app', 'http://localhost:5173'],
-  credentials: true
+ origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 // --- ROTA DE VEÍCULOS ---
 // Certifique-se de que o arquivo './routes/vehicles' existe no seu projeto
