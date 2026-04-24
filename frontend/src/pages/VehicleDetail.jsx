@@ -20,25 +20,16 @@ export default function VehicleDetail({ user }) {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        console.log("ID da URL:", id); // Verifica o ID que vem da URL
+        // Buscando da API correta no Northflank
         const response = await axios.get(`${API_URL}/api/vehicles`);
-        console.log("Veículos vindos da API:", response.data); // Verifica a lista do banco
-
-        // Tenta encontrar o veículo comparando com todas as possibilidades de ID
-        const found = response.data.find(v => 
-          String(v.$id) === String(id) || 
-          String(v.id) === String(id) || 
-          String(v._id) === String(id)
-        );
-
+        const found = response.data.find(v => (v.$id === id || v.id === id));
         if (found) {
-          console.log("Veículo encontrado!", found);
           setVehicle(found);
         } else {
-          console.error("Nenhum veículo da lista corresponde ao ID da URL.");
+          console.error("Veículo não encontrado na lista");
         }
       } catch (error) {
-        console.error("Erro na requisição Axios:", error);
+        console.error("Erro ao carregar detalhes:", error);
       } finally {
         setLoading(false);
       }
