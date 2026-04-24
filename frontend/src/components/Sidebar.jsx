@@ -9,9 +9,10 @@ export default function Sidebar({ onOpenAdmin }) {
   const isAdmin = useAdmin();
   const [cartCount, setCartCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: '1', text: "Sistema Online", time: "Agora" }
-  ]);
+  const [notifications, setNotifications] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem('notifications') || '[]');
+    return saved.length > 0 ? saved : [{ id: '1', text: "Sistema Online", time: "Agora" }];
+  });
   const notificationRef = useRef(null);
 
   useEffect(() => {
@@ -45,7 +46,12 @@ export default function Sidebar({ onOpenAdmin }) {
 
   useEffect(() => {
     updateCartCount();
-    const interval = setInterval(updateCartCount, 1000);
+    const interval = setInterval(() => {
+      updateCartCount();
+      // Sincroniza notificações do localStorage
+      const saved = JSON.parse(localStorage.getItem('notifications') || '[]');
+      if (saved.length > 0) setNotifications(saved);
+    }, 1000);
 
     const handleClickOutside = (event) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
@@ -59,7 +65,6 @@ export default function Sidebar({ onOpenAdmin }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = async () => {
