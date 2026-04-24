@@ -3,7 +3,7 @@ const router = express.Router();
 
 // AJUSTE DE CAMINHO: 
 // .. sai de 'routes', .. sai de 'src' e entra em 'config'
-const { databases } = require('../../config/appwrite'); 
+const { databases, ID } = require('../config/appwrite');
 
 // Rota para buscar todas as vendas (usada no VehicleCard e SalesStats)
 router.get('/', async (req, res) => {
@@ -23,11 +23,11 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { vehicleId, model, brand, price, rentalDate } = req.body;
-    
+
     const result = await databases.createDocument(
       process.env.APPWRITE_DATABASE_ID,
       process.env.APPWRITE_SALES_COLLECTION_ID,
-      'unique()',
+      ID.unique(), // <- aqui
       {
         vehicleId: String(vehicleId),
         model: String(model),
