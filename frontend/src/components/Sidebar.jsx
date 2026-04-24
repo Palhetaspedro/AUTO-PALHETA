@@ -2,7 +2,7 @@ import { Car, LogOut, Clock, LayoutDashboard, ShieldCheck, ShoppingCart, Bell, B
 import { Link, useLocation } from 'react-router-dom';
 import { account, client } from '../lib/appwrite';
 import { useState, useEffect, useRef } from 'react';
-import { useAdmin } from '../hooks/useAdmin';
+import { useAdmin } from '../../hooks/useAdmin';
 
 export default function Sidebar({ onOpenAdmin }) {
   const location = useLocation();
