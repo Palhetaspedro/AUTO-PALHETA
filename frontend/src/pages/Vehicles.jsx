@@ -43,7 +43,7 @@ export default function Vehicles({ user }) {
       {/* Hero Section */}
       <div className="relative h-[250px] md:h-[350px] w-full rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl group border-4 border-white">
         <img 
-          src="https://images.unsplash.com/photo-1530268578403-bf6e89800e70?q=70&w=800&auto=format&fit=crop" 
+          src="cars-_banners.png" 
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           alt="" 
         />
