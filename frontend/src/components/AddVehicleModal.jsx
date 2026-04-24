@@ -80,7 +80,8 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
         vehicleId: vehicle?.vehicleId || Date.now().toString()
       };
 
-      await axios.post('http://localhost:3001/api/vehicles', payload);
+      const API_URL = import.meta.env.VITE_API_URL || "https://palheta--auto-ultimatebackend--jyc2t58tq8fd.code.run";
+      await axios.post(`${API_URL}/api/vehicles`, payload);
 
       alert("Sucesso!");
       onRefresh();

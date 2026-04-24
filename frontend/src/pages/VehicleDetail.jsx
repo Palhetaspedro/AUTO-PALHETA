@@ -66,6 +66,18 @@ export default function VehicleDetail({ user }) {
         rentalDate: new Date().toISOString()
       };
       await axios.post(`${API_URL}/api/sales`, saleData);
+
+      // ADICIONA AO CARRINHO (localStorage)
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      cart.push({
+        id: vehicle.$id || vehicle.id,
+        model: vehicle.model,
+        brand: vehicle.brand,
+        price: Number(vehicle.price_per_hour),
+        image_url: vehicle.image_url
+      });
+      localStorage.setItem('cart', JSON.stringify(cart));
+
       setIsAdded(true);
     } catch (error) {
       console.error("Erro ao processar aluguel:", error);
