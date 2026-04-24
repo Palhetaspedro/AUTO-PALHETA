@@ -43,7 +43,7 @@ export default function Vehicles({ user }) {
       {/* Hero Section */}
       <div className="relative h-[250px] md:h-[350px] w-full rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl group border-4 border-white">
         <img 
-          src="cars-_banners.png" 
+          src="InteriorMercedes.jpg" 
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           alt="" 
         />
