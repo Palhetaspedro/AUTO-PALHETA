@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
+const { databases, ID } = require(appwritePath);
 // Procura o arquivo appwrite.js na pasta config
 const appwritePath = path.resolve(__dirname, './config/appwrite');
 const { databases } = require(appwritePath);
@@ -12,17 +13,16 @@ const app = express();
 // O Northflank injeta a variável PORT automaticamente
 const PORT = process.env.PORT || 3001;
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor rodando com sucesso na porta ${PORT}`);
-});
 // Configuração de CORS aberta para o seu Frontend conseguir acessar
 app.use(cors({
  origin: '*', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.use(express.json());
 // --- ROTA DE VEÍCULOS ---
-// Certifique-se de que o arquivo './routes/vehicles' existe no seu projeto
+
 const vehicleRoutes = require('./routes/vehicles');
 app.use('/api/vehicles', vehicleRoutes);
 
@@ -48,7 +48,7 @@ app.post('/api/sales', async (req, res) => {
     const result = await databases.createDocument(
       process.env.APPWRITE_DATABASE_ID,
       'sales_coll',
-      'unique()',
+      'ID.unique()',
       {
         transactionId: String(Date.now()), // ID temporal para evitar erro de campo vazio
         salesPersonId: 'sistema_web',
