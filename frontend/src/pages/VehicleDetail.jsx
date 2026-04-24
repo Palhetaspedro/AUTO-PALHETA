@@ -12,31 +12,30 @@ export default function VehicleDetail({ user }) {
   const [deleting, setDeleting] = useState(false);
 
   // Usa a variável da Vercel ou o link direto do Northflank como fallback
-  
   const API_URL = import.meta.env.VITE_API_URL || "https://palheta--auto-ultimatebackend--jyc2t58tq8fd.code.run";
+
   const isAdmin = user?.email === "palhetapedro@gmail.com";
   const bgUrl = "https://images.unsplash.com/photo-1518306727298-4c17e1bf6942?q=80&w=736&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
-  console.log("API_URL:", API_URL);
+
   useEffect(() => {
-  const fetchVehicle = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/api/vehicles`);
-      const found = response.data.find(v => String(v.$id || v.id) === String(id));
-      
-      if (found) {
-        setVehicle(found);
-      } else {
-        console.error("Veículo não encontrado na lista recebida do servidor");
+    const fetchVehicle = async () => {
+      try {
+        // Buscando da API correta no Northflank
+        const response = await axios.get(`${API_URL}/api/vehicles`);
+        const found = response.data.find(v => (v.$id === id || v.id === id));
+        if (found) {
+          setVehicle(found);
+        } else {
+          console.error("Veículo não encontrado na lista");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar detalhes:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Erro ao carregar detalhes:", error);
-      
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchVehicle();
-}, [id, API_URL]);
+    };
+    fetchVehicle();
+  }, [id, API_URL]);
 
   const handleDelete = async () => {
     if (!window.confirm("Tem certeza que deseja excluir este veículo?")) return;
