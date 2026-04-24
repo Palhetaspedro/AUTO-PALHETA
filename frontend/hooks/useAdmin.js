@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { account } from '../lib/appwrite';
+import { account } from '../src/lib/appwrite';
 
 export function useAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
