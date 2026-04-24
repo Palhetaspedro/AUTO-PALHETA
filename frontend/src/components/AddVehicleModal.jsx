@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, Upload, Loader2, CarFront, Tag, Fuel, Settings } from 'lucide-react';
+import { X, Upload, Loader2, CarFront, Tag, Fuel, Settings, Hash } from 'lucide-react';
 import { uploadVehicleImage } from '../lib/appwrite';
+import { ADMIN_EMAIL } from '../config';
 import axios from 'axios';
 
 export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = null }) {
@@ -8,7 +9,6 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
-  // Valores iniciais rigorosamente em minúsculo para o Appwrite
   const initialForm = {
     brand: '',
     model: '',
@@ -18,7 +18,8 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
     Transmission: 'Automatic',
     color: 'Black',
     vin: '',
-    vehicleType: 'sedan' 
+    vehicleType: 'sedan',
+    stock: 1 // Valor inicial padrão
   };
 
   const [formData, setFormData] = useState(initialForm);
@@ -34,7 +35,8 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
         Transmission: vehicle.Transmission || 'Automatic',
         color: vehicle.color || 'Black',
         vin: vehicle.vin || '',
-        vehicleType: (vehicle.vehicleType || 'sedan').toLowerCase()
+        vehicleType: (vehicle.vehicleType || 'sedan').toLowerCase(),
+        stock: vehicle.stock || 0
       });
       setImagePreview(vehicle.image_url || null);
     } else if (!vehicle && isOpen) {
@@ -68,12 +70,13 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
         }
       }
 
-      // Payload limpo e seguro
       const payload = {
         ...formData,
-        vehicleType: formData.vehicleType.toLowerCase().trim(), // Força minúsculo
-        year: Number(formData.year),
-        price_per_hour: Number(formData.price_per_hour),
+        vehicleType: formData.vehicleType.toLowerCase().trim(),
+        year: Number(formData.year) || 2026,
+        price_per_hour: Number(formData.price_per_hour) || 0,
+        // GARANTIA: Se formData.stock estiver vazio, envia 0 em vez de null
+        stock: formData.stock !== "" ? Number(formData.stock) : 0,
         image_url: finalImageUrl,
         vehicleId: vehicle?.vehicleId || Date.now().toString()
       };
@@ -94,7 +97,7 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans">
       <div className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl overflow-hidden max-h-[95vh] flex flex-col">
-        
+
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <div className="flex items-center gap-3">
             <div className="bg-black p-2 rounded-xl text-white">
@@ -139,12 +142,11 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
               <input type="text" className="bg-gray-100 p-3.5 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-black font-bold text-sm" value={formData.model} onChange={e => setFormData({ ...formData, model: e.target.value })} required />
             </div>
 
-            {/* SELETOR DE CATEGORIA - VALORES EXATOS DO APPWRITE */}
             <div className="flex flex-col gap-1 col-span-2">
               <label className="text-[10px] font-black text-gray-400 uppercase ml-1 flex items-center gap-1">
                 <Tag size={10} /> Categoria
               </label>
-              <select 
+              <select
                 className="bg-gray-100 p-3.5 rounded-2xl outline-none border-2 border-transparent focus:border-black font-bold text-sm cursor-pointer"
                 value={formData.vehicleType}
                 onChange={e => setFormData({ ...formData, vehicleType: e.target.value })}
@@ -161,11 +163,15 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
               <label className="text-[10px] font-black text-gray-400 uppercase ml-1 flex items-center gap-1">
                 <Fuel size={10} /> Combustível
               </label>
-              <select className="bg-gray-100 p-3.5 rounded-2xl outline-none border-2 border-transparent focus:border-black font-bold text-sm cursor-pointer" value={formData.fuel_type} onChange={e => setFormData({ ...formData, fuel_type: e.target.value })}>
+              <select
+                className="bg-gray-100 p-3.5 rounded-2xl outline-none border-2 border-transparent focus:border-black font-bold text-sm cursor-pointer"
+                value={formData.fuel_type}
+                onChange={e => setFormData({ ...formData, fuel_type: e.target.value })}
+              >
+
                 <option value="Gasoline">Gasolina</option>
                 <option value="Electric">Elétrico</option>
-                <option value="Hybrid">Híbrido</option>
-                <option value="Diesel">Diesel</option>
+                <option value="etc">Híbrido</option>
               </select>
             </div>
             <div className="flex flex-col gap-1">
@@ -182,8 +188,24 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
               <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Ano</label>
               <input type="number" className="bg-gray-100 p-3.5 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-black font-bold text-sm" value={formData.year} onChange={e => setFormData({ ...formData, year: e.target.value })} />
             </div>
+
+            {/* CAMPO DE ESTOQUE (STOCK) */}
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-black text-gray-400 uppercase ml-1">R$ / Hora</label>
+              <label className="text-[10px] font-black text-gray-400 uppercase ml-1 flex items-center gap-1">
+                <Hash size={10} /> Qtd. Frota
+              </label>
+              <input
+                type="number"
+                min="0"
+                className="bg-gray-100 p-3.5 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-black font-bold text-sm"
+                value={formData.stock}
+                onChange={e => setFormData({ ...formData, stock: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-1 col-span-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase ml-1">US$ / Hora</label>
               <input type="number" className="bg-gray-100 p-3.5 rounded-2xl outline-none focus:bg-white border-2 border-transparent focus:border-black font-bold text-sm" value={formData.price_per_hour} onChange={e => setFormData({ ...formData, price_per_hour: e.target.value })} required />
             </div>
           </div>
@@ -193,7 +215,7 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
             disabled={loading}
             className="w-full bg-black text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-gray-800 transition-all disabled:bg-gray-300 mt-2 shadow-xl active:scale-95"
           >
-            {loading ? <Loader2 className="animate-spin" /> : "Confirmar"}
+            {loading ? <Loader2 className="animate-spin" /> : "Confirmar Veículo"}
           </button>
         </form>
       </div>

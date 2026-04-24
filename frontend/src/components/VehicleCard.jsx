@@ -1,19 +1,26 @@
-import { Star, Clock, ShoppingCart } from 'lucide-react';
+import { Star, ShoppingCart, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { databases, DATABASE_ID } from '../lib/appwrite'; // Importe sua config do Appwrite
+import { Query } from 'appwrite';
 
 const saveToRecents = (vehicle) => {
+  if (!vehicle) return;
   const recents = JSON.parse(localStorage.getItem('recent_cars') || '[]');
   const filtered = recents.filter(item => item.$id !== vehicle.$id);
   const updated = [vehicle, ...filtered].slice(0, 10);
   localStorage.setItem('recent_cars', JSON.stringify(updated));
 };
 
-export default function VehicleCard({ vehicle, user }) {
+export default function VehicleCard({ vehicle: initialVehicle }) {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ rating: 5.0, totalSales: 0 }); // Estado para a lógica ao vivo
+  const [stats, setStats] = useState({ rating: 0.0, totalSales: 0 }); // Começa em 0
+  const [currentStock, setCurrentStock] = useState(Number(initialVehicle?.stock ?? 0));
+
+  const SALES_COLLECTION_ID = "sales_coll"; // ID da sua coleção de vendas
+
+  if (!initialVehicle) return null;
 
   const { 
     $id, 
@@ -22,48 +29,57 @@ export default function VehicleCard({ vehicle, user }) {
     year, 
     price_per_hour, 
     image_url, 
-    vehicleType, 
-    Transmission, 
     fuel_type 
-  } = vehicle;
+  } = initialVehicle;
 
-  // Lógica para buscar avaliações baseadas nas vendas reais
   useEffect(() => {
-    const fetchLiveStats = async () => {
+    // 1. Sincroniza estoque
+    if (initialVehicle?.stock !== undefined) {
+      setCurrentStock(Number(initialVehicle.stock));
+    }
+
+    // 2. Busca avaliações reais do Appwrite
+    async function getRealRating() {
       try {
-        // Buscamos todas as vendas do seu novo endpoint
-        const response = await axios.get('http://localhost:3001/api/sales');
-        const vehicleSales = response.data.filter(sale => sale.vehicleId === $id);
-        
-        if (vehicleSales.length > 0) {
-          // Lógica: Cada aluguel mantém a nota alta, mas simula uma variação real
-          // Se tiver 1 aluguel, nota 4.8. Se tiver mais, tende a 5.0
-          const calculatedRating = vehicleSales.length > 1 ? 5.0 : 4.8;
-          setStats({
-            rating: calculatedRating,
-            totalSales: vehicleSales.length
-          });
+        // Buscamos as vendas deste veículo específico
+        // Nota: Certifique-se que você salva o ID do veículo em algum campo na coleção de vendas
+        // Se você não salva o ID do veículo na venda, a média global será exibida.
+        const response = await databases.listDocuments(
+          DATABASE_ID,
+          SALES_COLLECTION_ID,
+          [Query.limit(100)] 
+        );
+
+        // Filtramos as notas que não são nulas (conforme sua imagem)
+        const ratings = response.documents
+          .map(doc => Number(doc.customerFeedbackRating))
+          .filter(rate => rate > 0);
+
+        if (ratings.length > 0) {
+          const sum = ratings.reduce((a, b) => a + b, 0);
+          const avg = sum / ratings.length;
+          setStats({ rating: avg, totalSales: ratings.length });
+        } else {
+          setStats({ rating: 5.0, totalSales: 0 }); // Default se nunca foi avaliado
         }
       } catch (error) {
-        console.error("Erro ao carregar avaliações ao vivo:", error);
+        console.error("Erro ao buscar rating:", error);
       }
-    };
+    }
 
-    fetchLiveStats();
-  }, [$id]);
-
-  const handleViewDetails = () => {
-    saveToRecents(vehicle);
-    navigate(`/vehicle/${$id}`);
-  };
+    getRealRating();
+  }, [initialVehicle, $id]);
 
   const handleReserve = (e) => {
     e.stopPropagation();
+    if (currentStock <= 0) {
+      toast.error("Este veículo não possui unidades disponíveis na frota.");
+      return;
+    }
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const isAlreadyInCart = cart.find(item => item.$id === $id);
-
     if (!isAlreadyInCart) {
-      cart.push(vehicle);
+      cart.push({ ...initialVehicle, stock: currentStock });
       localStorage.setItem('cart', JSON.stringify(cart));
       toast.success(`${brand} ${model} adicionado ao carrinho!`);
     } else {
@@ -74,68 +90,70 @@ export default function VehicleCard({ vehicle, user }) {
 
   return (
     <div 
-      onClick={handleViewDetails}
-      className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 hover:shadow-xl transition-all group cursor-pointer"
+      onClick={() => { saveToRecents(initialVehicle); navigate(`/vehicle/${$id}`); }}
+      className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-4 hover:shadow-2xl transition-all group cursor-pointer relative"
     >
-      <div className="relative h-48 w-full bg-gray-50 rounded-2xl overflow-hidden mb-4">
+      <div className="absolute top-6 right-6 z-10">
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md shadow-sm border ${
+          currentStock > 0 ? 'bg-green-500/10 border-green-200' : 'bg-red-500/10 border-red-200'
+        }`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${currentStock > 0 ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+          <span className={`text-[9px] font-black uppercase tracking-widest ${
+            currentStock > 0 ? 'text-green-700' : 'text-red-700'
+          }`}>
+            {currentStock > 0 ? 'Disponível' : 'Esgotado'}
+            {currentStock > 0 && (
+              <span className="ml-1 text-green-600/60 font-bold">[{currentStock}]</span>
+            )}
+          </span>
+        </div>
+      </div>
+
+      <div className="relative h-48 w-full bg-gray-50 rounded-[2rem] overflow-hidden mb-4">
         {image_url ? (
           <img 
             src={image_url} 
-            alt={`${brand} ${model}`} 
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${
+              currentStock > 0 ? 'opacity-100' : 'opacity-40 grayscale'
+            }`}
+            alt={model}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400 text-sm italic">
-            Sem imagem disponível
-          </div>
+          <div className="flex items-center justify-center h-full text-gray-400 text-xs italic font-bold uppercase">Sem Foto</div>
         )}
-        
-        <div className="absolute top-3 left-3 bg-black/80 backdrop-blur text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
-          {vehicleType || 'Premium'}
-        </div>
       </div>
 
       <div className="flex justify-between items-start px-1">
         <div>
-          <h3 className="font-black text-gray-900 text-lg tracking-tight uppercase">
-            {brand} {model}
-          </h3>
-          <p className="text-gray-400 text-xs font-medium">{year} • {fuel_type || 'Flex'}</p>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">{brand}</p>
+          <h3 className="font-black text-gray-900 text-xl tracking-tighter uppercase leading-none">{model}</h3>
+          <p className="text-gray-400 text-[10px] font-bold uppercase mt-1 italic">{year} • {fuel_type}</p>
+        </div>
+        <div className="flex items-center gap-1 bg-yellow-400/10 px-2 py-1 rounded-lg">
+          <Star size={12} className="fill-yellow-400 text-yellow-400" />
+          {/* AQUI MOSTRA O RATING REAL CALCULADO */}
+          <span className="text-xs font-black text-yellow-700">{stats.rating.toFixed(1)}</span>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-50">
+        <div>
+          <span className="text-2xl font-black text-black tracking-tighter">
+            U$ {Number(price_per_hour || 0).toLocaleString('en-US')}
+          </span>
+          <span className="text-gray-400 text-[10px] font-black uppercase ml-1">/hr</span>
         </div>
         
-        {/* AVALIAÇÃO AO VIVO: Mostra a nota e quantos aluguéis o carro já teve */}
-        <div className="flex flex-col items-end">
-          <div className="flex items-center gap-1 bg-yellow-400/10 px-2 py-1 rounded-lg">
-            <Star size={14} className="fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-bold text-yellow-700">{stats.rating.toFixed(1)}</span>
-          </div>
-          {stats.totalSales > 0 && (
-            <span className="text-[9px] text-gray-400 font-bold mt-1 uppercase">
-              {stats.totalSales} {stats.totalSales === 1 ? 'aluguel' : 'aluguéis'}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4 mt-4 px-1 text-gray-500 text-[11px] font-semibold uppercase tracking-wide">
-        <div className="flex items-center gap-1.5">
-          <Clock size={14} className="text-blue-500" />
-          <span>{Transmission || 'Automático'}</span>
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-50 px-1">
-        <div>
-          <span className="text-2xl font-black text-black">
-            U$ {Number(price_per_hour).toLocaleString('en-US')}
-          </span>
-          <span className="text-gray-400 text-xs font-bold">/hora</span>
-        </div>
         <button 
           onClick={handleReserve}
-          className="bg-black text-white p-3 rounded-2xl hover:bg-blue-600 transition-all active:scale-95 shadow-lg shadow-gray-200"
+          disabled={currentStock <= 0}
+          className={`p-3.5 rounded-2xl transition-all active:scale-90 shadow-xl ${
+            currentStock > 0 
+            ? 'bg-black text-white hover:bg-zinc-800' 
+            : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'
+          }`}
         >
-          <ShoppingCart size={20} />
+          {currentStock > 0 ? <ShoppingCart size={20} /> : <AlertCircle size={20} />}
         </button>
       </div>
     </div>

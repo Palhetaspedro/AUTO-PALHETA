@@ -24,7 +24,9 @@ exports.create = async (req, res) => {
             vin: String(req.body.vin || "").substring(0, 17),
             color: String(req.body.color || "Black"),
             
-            // Enviamos os valores EXATAMENTE como vêm do frontend para não bugar o Enum
+            // ADICIONADO: Lógica de estoque
+            stock: parseInt(req.body.stock) || 0, 
+
             fuel_type: req.body.fuel_type || "Gasoline",
             vehicleType: req.body.vehicleType || "sedan",
             Transmission: req.body.Transmission || "Automatic"
@@ -57,7 +59,9 @@ exports.update = async (req, res) => {
             vin: String(req.body.vin || "").substring(0, 17),
             color: String(req.body.color),
             
-            // Mantemos os valores puros vindo do formulário
+            // ADICIONADO: Atualização de estoque
+            stock: parseInt(req.body.stock) || 0,
+
             fuel_type: req.body.fuel_type,
             vehicleType: req.body.vehicleType,
             Transmission: req.body.Transmission

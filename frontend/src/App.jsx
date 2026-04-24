@@ -77,7 +77,7 @@ export default function App() {
                 
                 <Route path="/favourites" element={user ? <Favourites user={user} /> : <Navigate to="/" replace />} />
                 <Route path="/recents" element={user ? <Recents /> : <Navigate to="/" replace />} />
-                <Route path="/cart" element={user ? <Cart /> : <Navigate to="/" replace />} />
+                <Route path="/cart" element={user ? <Cart user={user} /> : <Navigate to="/" replace />} />
                 <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/" replace />} />
 
                 {/* ADICIONADO: Rota de Estatísticas / Visão de Negócio */}

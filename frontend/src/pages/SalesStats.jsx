@@ -1,161 +1,197 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
-import { DollarSign, Car, Calendar, TrendingUp, Users, ArrowUpRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { databases, DATABASE_ID, COLLECTION_ID } from '../lib/appwrite';
-
-// Dados simulados para o gráfico (Faturamento e Aluguéis)
-const data = [
-  { name: 'Jan', faturamento: 4200, alugueis: 24 },
-  { name: 'Fev', faturamento: 3800, alugueis: 18 },
-  { name: 'Mar', faturamento: 5500, alugueis: 35 },
-  { name: 'Abr', faturamento: 4800, alugueis: 29 },
-  { name: 'Mai', faturamento: 7200, alugueis: 42 },
-  { name: 'Jun', faturamento: 6100, alugueis: 38 },
-];
+import { databases, DATABASE_ID } from '../lib/appwrite';
+import { Query } from 'appwrite';
+import { 
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, 
+  BarChart, Bar, Cell, LabelList, ReferenceLine
+} from 'recharts';
+import { DollarSign, ShoppingCart, Tag, Target, Loader2 } from 'lucide-react';
 
 export default function SalesStats() {
-  const [totalVehicles, setTotalVehicles] = useState(0);
+  const [stats, setStats] = useState({ chartData: [], totalRevenue: 0, salesCount: 0, avgTicket: 0, goalCalc: 0 });
+  const [loading, setLoading] = useState(true);
 
-  // Busca o total real da frota no Appwrite
+  const SALES_COLLECTION_ID = "sales_coll";
+  const META_MENSAL = 50000;
+
+  // Formatação de Moeda BRL
+  const formatBRL = (value) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
+
+  // Formatação compacta para os pontinhos (Ex: R$0,24 Mi ou R$ 15 Mil)
+  const formatCompact = (value) => {
+    if (!value || value === 0) return ''; // Esconde o texto se for zero
+    if (value >= 1000000) return `R$${(value / 1000000).toFixed(2).replace('.', ',')} Mi`;
+    if (value >= 1000) return `R$${(value / 1000).toFixed(1).replace('.', ',')} Mil`;
+    return `R$${value.toFixed(0)}`;
+  };
+
   useEffect(() => {
-    const fetchStats = async () => {
+    async function loadRealData() {
       try {
-        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-        setTotalVehicles(response.total);
+        const response = await databases.listDocuments(DATABASE_ID, SALES_COLLECTION_ID, [Query.limit(500)]);
+        const docs = response.documents;
+
+        // 1. Cálculos de KPI
+        const totalRevenue = docs.reduce((acc, d) => acc + (Number(d.finalPrice) || 0), 0);
+        const salesCount = docs.length;
+        const avgTicket = salesCount > 0 ? totalRevenue / salesCount : 0;
+        const goalCalc = ((totalRevenue / META_MENSAL) * 100).toFixed(1);
+
+        // 2. Estrutura dos 12 meses do ano
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        let dadosMensais = meses.map(m => ({ name: m, value: 0 }));
+
+        // 3. Preenche os meses com os dados reais do Appwrite
+        docs.forEach(d => {
+          if (d.saleDate) {
+            const date = new Date(d.saleDate);
+            const monthIndex = date.getMonth(); // 0 (Jan) a 11 (Dez)
+            dadosMensais[monthIndex].value += (Number(d.finalPrice) || 0);
+          }
+        });
+
+        // 4. Calcula a Variação (Gráfico de baixo)
+        const chartData = dadosMensais.map((item, index) => {
+          let variation = 0;
+          if (index > 0 && dadosMensais[index - 1].value > 0) {
+            // (Mês Atual - Mês Anterior) / Mês Anterior * 100
+            variation = ((item.value - dadosMensais[index - 1].value) / dadosMensais[index - 1].value) * 100;
+          } else if (index > 0 && dadosMensais[index - 1].value === 0 && item.value > 0) {
+            variation = 100; // Crescimento base se o mês anterior for 0
+          }
+
+          return {
+            ...item,
+            label: formatCompact(item.value), // Valor para o gráfico de cima
+            variation: Number(variation.toFixed(1)), // Valor para o gráfico de baixo
+            varLabel: item.value === 0 && (index === 0 || dadosMensais[index-1].value === 0) ? '0,0%' : `${variation > 0 ? '' : ''}${variation.toFixed(1).replace('.', ',')}%`
+          };
+        });
+
+        setStats({ chartData, totalRevenue, salesCount, avgTicket, goalCalc });
       } catch (error) {
-        console.error("Erro ao buscar estatísticas:", error);
+        console.error("Erro ao buscar dados:", error);
+      } finally {
+        setLoading(false);
       }
-    };
-    fetchStats();
+    }
+    loadRealData();
   }, []);
 
+  if (loading) return <div className="flex h-96 items-center justify-center bg-gray-50"><Loader2 className="animate-spin text-[#6d28d9]" size={40} /></div>;
+
   return (
-    <div className="space-y-8 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-4xl font-black tracking-tighter text-gray-900">Visão Geral do Negócio</h1>
-          <p className="text-gray-500 font-medium">Monitore a performance da sua frota e receita em tempo real.</p>
-        </div>
-        <div className="bg-black text-white px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
-          AO VIVO
+    <div className="min-h-screen bg-[#f3f4f6] font-sans pb-12">
+      
+      {/* TOPO KPI (Mantive escuro para dar contraste premium, mas você pode mudar) */}
+      <div className="bg-[#1e1b4b] pt-8 pb-24 px-8">
+        <h1 className="text-white text-2xl font-bold mb-8">Dashboard Financeiro</h1>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <KPICard title="Faturamento" value={formatBRL(stats.totalRevenue)} icon={<DollarSign />} />
+          <KPICard title="Veículos Alugados" value={stats.salesCount} icon={<ShoppingCart />} />
+          <KPICard title="Ticket Médio" value={formatBRL(stats.avgTicket)} icon={<Tag />} />
+          <KPICard title="Meta" value={`${stats.goalCalc}%`} icon={<Target />} />
         </div>
       </div>
 
-      {/* Cards de KPI */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Receita Mensal', value: 'R$ 24.500', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '+12.5%' },
-          { label: 'Aluguéis Ativos', value: '12', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50', trend: '+3 hoje' },
-          { label: 'Frota Total', value: totalVehicles, icon: Car, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: 'Disponíveis' },
-          { label: 'Avaliação Média', value: '4.9', icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-50', trend: '★ Excelente' },
-        ].map((kpi, i) => (
-          <div key={i} className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-            <div className="flex justify-between items-start mb-4">
-              <div className={`w-12 h-12 ${kpi.bg} ${kpi.color} rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110`}>
-                <kpi.icon size={24} />
-              </div>
-              <span className="text-[10px] font-black px-2 py-1 bg-gray-50 rounded-lg text-gray-400 group-hover:text-black transition-colors">{kpi.trend}</span>
-            </div>
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">{kpi.label}</p>
-            <h3 className="text-3xl font-black mt-1 text-gray-900">{kpi.value}</h3>
-          </div>
-        ))}
-      </div>
-
-      {/* Gráfico de Faturamento Avançado */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <h2 className="text-xl font-black text-gray-900">Análise de Receita</h2>
-              <p className="text-sm text-gray-400 font-bold">Desempenho financeiro do último semestre</p>
-            </div>
-            <select className="bg-gray-50 border-none rounded-2xl px-4 py-3 text-xs font-black outline-none ring-2 ring-transparent focus:ring-black transition-all">
-              <option>Últimos 6 Meses</option>
-              <option>Último Ano</option>
-            </select>
-          </div>
-          
-          <div className="h-[350px] w-full">
+      {/* ÁREA DOS GRÁFICOS (Fundo Claro igual a imagem) */}
+      <div className="px-8 -mt-16 space-y-8 max-w-6xl mx-auto">
+        
+        {/* GRÁFICO 1: Evolução das Vendas (Linha/Área) */}
+        <div className="bg-white pt-6 pb-2 px-6 rounded-xl shadow-md border-t-4 border-t-[#6d28d9]">
+          <h3 className="text-center font-bold text-gray-800 mb-8">Evolução das Vendas</h3>
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data}>
-                <defs>
-                  <linearGradient id="colorFaturamento" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#9ca3af', fontSize: 12, fontWeight: 'bold'}} 
-                  dy={10} 
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#9ca3af', fontSize: 12, fontWeight: 'bold'}} 
-                />
+              <AreaChart data={stats.chartData} margin={{ top: 20, right: 30, left: 30, bottom: 20 }}>
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#6b7280'}} dy={10} />
+                <YAxis hide domain={['dataMin', 'dataMax + 500']} />
                 <Tooltip 
-                  cursor={{ stroke: '#4f46e5', strokeWidth: 2 }}
-                  contentStyle={{ 
-                    borderRadius: '24px', 
-                    border: 'none', 
-                    padding: '20px',
-                    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' 
-                  }}
+                  formatter={(value) => [formatBRL(value), 'Faturamento']}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
                 />
                 <Area 
-                  type="monotone" 
-                  dataKey="faturamento" 
-                  stroke="#4f46e5" 
-                  strokeWidth={4} 
+                  type="linear" // Linha reta igual a foto
+                  dataKey="value" 
+                  stroke="#6d28d9" // Roxo escuro
+                  strokeWidth={2}
                   fillOpacity={1} 
-                  fill="url(#colorFaturamento)" 
-                  animationDuration={2000}
-                />
+                  fill="#c4b5fd" // Roxo claro sólido (sem gradiente, igual a foto)
+                  activeDot={{ r: 6, strokeWidth: 0, fill: '#4c1d95' }}
+                  dot={{ r: 4, fill: '#6d28d9', strokeWidth: 0 }} // Pontinhos roxos preenchidos
+                >
+                  {/* Textos flutuantes em cima dos pontos */}
+                  <LabelList dataKey="label" position="top" offset={12} fill="#6b7280" fontSize={11} fontWeight="500" />
+                </Area>
               </AreaChart>
             </ResponsiveContainer>
           </div>
+          <div className="text-center text-gray-400 text-xs pb-2 mt-[-10px]">2026</div> {/* Ano fictício abaixo do eixo X */}
         </div>
 
-        {/* Segundo Gráfico: Volume de Aluguéis */}
-        <div className="bg-black p-8 rounded-[40px] shadow-2xl flex flex-col justify-between">
-          <div>
-            <h2 className="text-xl font-black text-white">Volume de Aluguéis</h2>
-            <p className="text-sm text-gray-400 font-bold mb-8">Reservas mensais finalizadas</p>
-            
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
-                  <Bar dataKey="alugueis" radius={[10, 10, 10, 10]}>
-                    {data.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 4 ? '#818cf8' : '#ffffff20'} />
-                    ))}
-                  </Bar>
-                  <Tooltip cursor={false} content={({ active, payload }) => {
-                    if (active && payload) return (
-                      <div className="bg-white p-2 rounded-lg font-black text-xs text-black">
-                        {payload[0].value} aluguéis
-                      </div>
-                    );
-                    return null;
-                  }} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+        {/* GRÁFICO 2: Variação Anual das Vendas (Barras) */}
+        <div className="bg-white pt-6 pb-2 px-6 rounded-xl shadow-md">
+          <h3 className="text-center font-bold text-gray-800 mb-8">Variação Anual das Vendas</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.chartData} margin={{ top: 30, right: 30, left: 30, bottom: 20 }}>
+                {/* Linha roxa no meio (Zero) */}
+                <ReferenceLine y={0} stroke="#a78bfa" strokeWidth={2} /> 
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#6b7280'}} dy={10} />
+                <YAxis hide />
+                <Tooltip 
+                  cursor={{fill: '#f3f4f6'}}
+                  formatter={(value) => [`${value}%`, 'Variação']}
+                />
+                <Bar dataKey="variation" radius={[2, 2, 2, 2]} barSize={32}>
+                  {stats.chartData.map((entry, index) => (
+                    // Positivo = Roxo escuro, Negativo = Roxo claro
+                    <Cell key={`cell-${index}`} fill={entry.variation >= 0 ? '#6d28d9' : '#c4b5fd'} /> 
+                  ))}
+                  {/* Renderiza a porcentagem em cima ou embaixo dependendo se é positivo ou negativo */}
+                  <LabelList 
+                    dataKey="varLabel" 
+                    position="outside" 
+                    content={(props) => {
+                      const { x, y, width, value, offset } = props;
+                      // Se for variação negativa, joga o texto pra baixo da barra
+                      const isNegative = parseFloat(value) < 0;
+                      const textY = isNegative ? y + offset + 15 : y - offset;
+                      return (
+                        <text x={x + width / 2} y={textY} fill="#6b7280" fontSize="11" textAnchor="middle" fontWeight="500">
+                          {value}
+                        </text>
+                      );
+                    }} 
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          
-          <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-md">
-            <p className="text-white text-sm font-bold flex items-center gap-2">
-              <ArrowUpRight className="text-green-400" /> +15% em relação a Maio
-            </p>
-            <p className="text-gray-400 text-xs mt-1">O crescimento superou a meta trimestral.</p>
+          <div className="text-center text-gray-400 text-xs pb-2 mt-[-10px]">2026</div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// Componente do Cartão (Mantido com o Ponto na formatação do Ticket)
+function KPICard({ title, value, icon }) {
+  return (
+    <div className="bg-[#2e2b5e] border border-[#3e3b73] p-5 rounded-lg shadow-lg relative overflow-hidden">
+      <div className="absolute -right-2 -bottom-2 text-white opacity-5 transform scale-150">
+        {icon}
+      </div>
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-gray-300 text-xs font-semibold uppercase tracking-wider">{title}</span>
+          <div className="p-1 bg-[#3e3b73] rounded-full text-purple-300">
+            {icon}
           </div>
         </div>
+        <div className="text-white text-2xl font-bold tracking-tight">{value}</div>
       </div>
     </div>
   );

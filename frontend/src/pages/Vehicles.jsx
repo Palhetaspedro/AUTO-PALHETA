@@ -8,7 +8,10 @@ export default function Vehicles({ user }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
-  // Estados para os filtros específicos do seu sistema
+  // --- DEFINIÇÃO DO ADMINISTRADOR ---
+  // Substitua pelo seu e-mail real cadastrado no Appwrite
+  const isAdmin = user?.email === 'seu-email-admin@exemplo.com';
+
   const [filters, setFilters] = useState({
     type: '',
     transmission: '',
@@ -27,12 +30,10 @@ export default function Vehicles({ user }) {
     fetchVehicles();
   }, []);
 
-  // Lógica de filtro avançada
   const filteredVehicles = vehicles.filter(v => {
     const matchesSearch = v.brand?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           v.model?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // CORREÇÃO: Comparação direta com os valores em minúsculo do banco
     const matchesType = filters.type === '' || v.vehicleType === filters.type;
     const matchesTrans = filters.transmission === '' || v.Transmission === filters.transmission;
     const matchesFuel = filters.fuel === '' || v.fuel_type === filters.fuel;
@@ -44,7 +45,7 @@ export default function Vehicles({ user }) {
     <div className="space-y-10 animate-in fade-in duration-700">
       
       {/* Hero Section */}
-      <div className="relative h-[350px] w-full rounded-[3rem] overflow-hidden shadow-2xl group">
+      <div className="relative h-[350px] w-full rounded-[3rem] overflow-hidden shadow-2xl group border-4 border-white">
         <img 
           src="https://images.unsplash.com/photo-1530268578403-bf6e89800e70?q=80&w=1600&auto=format&fit=crop" 
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
@@ -52,15 +53,17 @@ export default function Vehicles({ user }) {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex items-center p-12">
           <div className="max-w-2xl space-y-4">
-            <h1 className="text-5xl font-black text-white leading-tight tracking-tighter">
-              DOMINE A ESTRADA <br /> 
+            {/* Tag dinâmica de Boas-vindas baseada no Profile */}
+            <div className="inline-block px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] font-black text-white uppercase tracking-[0.3em]">
+              {isAdmin ? "Acesso administrativo liberado" : `Bem-vindo à frota, ${user?.name || 'Piloto'}`}
+            </div>
+            
+            <h1 className="text-5xl font-black text-white leading-tight tracking-tighter uppercase italic">
+              {isAdmin ? "Gestão de Frota" : "Domine a Estrada"} <br /> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-500">
-                SOB QUALQUER CONDIÇÃO.
+                {isAdmin ? "Sua Garagem Premium" : "Sob qualquer condição."}
               </span>
             </h1>
-            <p className="text-gray-300 text-lg font-medium max-w-md">
-              Veículos de alta performance preparados para elevar sua jornada, faça chuva ou faça sol.
-            </p>
           </div>
         </div>
       </div>
@@ -72,7 +75,7 @@ export default function Vehicles({ user }) {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
             <input 
               type="text" 
-              placeholder="Qual máquina você procura hoje?" 
+              placeholder={isAdmin ? "Buscar na garagem..." : "Qual máquina você procura hoje?"} 
               className="w-full pl-12 pr-4 py-3 bg-transparent border-none focus:ring-0 text-gray-900 placeholder-gray-400 font-bold text-lg"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -80,7 +83,7 @@ export default function Vehicles({ user }) {
           </div>
           <button 
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center gap-3 px-8 py-4 rounded-3xl font-black transition-all active:scale-95 ${isFilterOpen ? 'bg-blue-600 text-white' : 'bg-black text-white'}`}
+            className={`flex items-center gap-3 px-8 py-4 rounded-3xl font-black transition-all active:scale-95 shadow-lg ${isFilterOpen ? 'bg-blue-600 text-white' : 'bg-black text-white'}`}
           >
             {isFilterOpen ? <X size={20} /> : <Filter size={20} />}
             FILTRAR
@@ -93,12 +96,11 @@ export default function Vehicles({ user }) {
             <div>
               <label className="block text-xs font-black text-gray-400 uppercase mb-2 tracking-widest">Tipo de Veículo</label>
               <select 
-                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
                 value={filters.type}
                 onChange={(e) => setFilters({...filters, type: e.target.value})}
               >
                 <option value="">Todos os Tipos</option>
-                {/* AJUSTADO: value agora em minúsculo para bater com o banco */}
                 <option value="sedan">Sedan</option>
                 <option value="suv">SUV</option>
                 <option value="coupe">Coupe / Sport</option>
@@ -110,7 +112,7 @@ export default function Vehicles({ user }) {
             <div>
               <label className="block text-xs font-black text-gray-400 uppercase mb-2 tracking-widest">Transmissão</label>
               <select 
-                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
                 value={filters.transmission}
                 onChange={(e) => setFilters({...filters, transmission: e.target.value})}
               >
@@ -123,7 +125,7 @@ export default function Vehicles({ user }) {
             <div>
               <label className="block text-xs font-black text-gray-400 uppercase mb-2 tracking-widest">Combustível</label>
               <select 
-                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
                 value={filters.fuel}
                 onChange={(e) => setFilters({...filters, fuel: e.target.value})}
               >
@@ -137,15 +139,22 @@ export default function Vehicles({ user }) {
         )}
       </div>
 
-      {/* Grid de Veículos */}
+      {/* Grid de Veículos - IMPORTANTE: Passando isAdmin */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
         {filteredVehicles.length > 0 ? (
           filteredVehicles.map(vehicle => (
-            <VehicleCard key={vehicle.$id} vehicle={vehicle} user={user} />
+            <VehicleCard 
+              key={vehicle.$id} 
+              vehicle={vehicle} 
+              user={user} 
+              isAdmin={isAdmin} // Agora o card sabe se você é o admin!
+            />
           ))
         ) : (
           <div className="col-span-full text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
-            <p className="text-gray-400 font-bold text-xl uppercase tracking-tighter">Nenhum veículo Disponível. :(</p>
+            <p className="text-gray-400 font-bold text-xl uppercase tracking-tighter">
+              {isAdmin ? "Você ainda não cadastrou veículos." : "Nenhum veículo disponível. :("}
+            </p>
           </div>
         )}
       </div>

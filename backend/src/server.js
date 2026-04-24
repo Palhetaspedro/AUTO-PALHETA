@@ -17,7 +17,7 @@ app.use(express.json());
 const vehicleRoutes = require('./routes/vehicles');
 app.use('/api/vehicles', vehicleRoutes);
 
-// --- ROTA DE VENDAS (Ajustada para o seu banco) ---
+// --- ROTA DE VENDAS ---
 app.get('/api/sales', async (req, res) => {
   try {
     const response = await databases.listDocuments(
@@ -34,6 +34,7 @@ app.post('/api/sales', async (req, res) => {
   try {
     const { vehicleId, price } = req.body;
 
+    // 1. REGISTRA A VENDA NO BANCO
     const result = await databases.createDocument(
       process.env.APPWRITE_DATABASE_ID,
       'sales_coll',
@@ -43,11 +44,35 @@ app.post('/api/sales', async (req, res) => {
         salesPersonId: 'sistema_web',
         saleDate: new Date().toISOString(),
         finalPrice: parseFloat(price),
-        // AJUSTADO: Agora está igual à sua imagem (creditCard)
         paymentMethod: 'creditCard', 
         discountApplied: false
       }
     );
+
+    // 2. ATUALIZA A FROTA (BAIXA AUTOMÁTICA)
+    try {
+      // Busca o veículo atual para saber o estoque antes de diminuir
+      const vehicle = await databases.getDocument(
+        process.env.APPWRITE_DATABASE_ID,
+        'vehicles_coll', // Verifique se o ID da sua coleção de carros é este mesmo
+        vehicleId
+      );
+
+      if (vehicle.stock > 0) {
+        await databases.updateDocument(
+          process.env.APPWRITE_DATABASE_ID,
+          'vehicles_coll',
+          vehicleId,
+          {
+            stock: vehicle.stock - 1
+          }
+        );
+        console.log(`📉 Estoque atualizado: ${vehicle.brand} agora tem ${vehicle.stock - 1} unidades.`);
+      }
+    } catch (stockError) {
+      console.error("⚠️ Venda registrada, mas falha ao atualizar estoque:", stockError.message);
+    }
+
     res.status(201).json(result);
   } catch (error) {
     console.error("❌ Erro detalhado do Appwrite:", error.message);
