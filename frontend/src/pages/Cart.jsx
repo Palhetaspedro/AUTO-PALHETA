@@ -18,10 +18,22 @@ export default function Cart({ user }) {
     setCartItems(savedCart);
   }, []);
 
+  const addNotification = (text) => {
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    notifications.unshift({
+      id: Date.now(),
+      text,
+      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    });
+    localStorage.setItem('notifications', JSON.stringify(notifications.slice(0, 20)));
+  };
+
   const removeItem = (id) => {
+    const item = cartItems.find(i => (i.$id || i.id) === id);
     const updatedCart = cartItems.filter(item => (item.$id || item.id) !== id);
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
+    if (item) addNotification(`🗑️ ${item.brand} ${item.model} removido do carrinho`);
   };
 
   const formatPrice = (price) => {
@@ -45,7 +57,7 @@ export default function Cart({ user }) {
           transactionId: ID.unique(), 
           salesPersonId: String(user.$id), 
           saleDate: new Date().toISOString(), 
-          finalPrice: Number(item.price || item.price_per_hour), // CORRIGIDO
+          finalPrice: Number(item.price || item.price_per_hour),
           paymentMethod: "creditCard",
           customerFeedbackRating: null,
           discountApplied: false 
@@ -63,7 +75,7 @@ export default function Cart({ user }) {
           await databases.updateDocument(
             DATABASE_ID,
             VEHICLES_COLLECTION_ID,
-            item.$id || item.id, // CORRIGIDO
+            item.$id || item.id,
             { stock: Math.max(0, Number(item.stock || 0) - 1) }
           );
         } catch (e) {
@@ -74,6 +86,7 @@ export default function Cart({ user }) {
       setRentedDocIds(newDocIds);
       localStorage.removeItem('cart');
       setCartItems([]);
+      addNotification(`✅ Aluguel finalizado com sucesso!`); // NOTIFICAÇÃO
       setPaymentStep('success');
       
     } catch (error) {

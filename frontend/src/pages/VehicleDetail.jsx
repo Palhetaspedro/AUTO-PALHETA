@@ -56,34 +56,43 @@ export default function VehicleDetail({ user }) {
   };
 
   const handleRentNow = async () => {
-    if (!vehicle || vehicle.stock <= 0) return;
-    try {
-      const saleData = {
-        vehicleId: vehicle.$id || vehicle.id,
-        model: vehicle.model,
-        brand: vehicle.brand,
-        price: Number(vehicle.price_per_hour),
-        rentalDate: new Date().toISOString()
-      };
-      await axios.post(`${API_URL}/api/sales`, saleData);
+  if (!vehicle || vehicle.stock <= 0) return;
+  try {
+    const saleData = {
+      vehicleId: vehicle.$id || vehicle.id,
+      model: vehicle.model,
+      brand: vehicle.brand,
+      price: Number(vehicle.price_per_hour),
+      rentalDate: new Date().toISOString()
+    };
+    await axios.post(`${API_URL}/api/sales`, saleData);
 
-      // ADICIONA AO CARRINHO (localStorage)
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      cart.push({
-        id: vehicle.$id || vehicle.id,
-        model: vehicle.model,
-        brand: vehicle.brand,
-        price: Number(vehicle.price_per_hour),
-        image_url: vehicle.image_url
-      });
-      localStorage.setItem('cart', JSON.stringify(cart));
+    // Adiciona ao carrinho
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    cart.push({
+      id: vehicle.$id || vehicle.id,
+      model: vehicle.model,
+      brand: vehicle.brand,
+      price: Number(vehicle.price_per_hour),
+      image_url: vehicle.image_url
+    });
+    localStorage.setItem('cart', JSON.stringify(cart));
 
-      setIsAdded(true);
-    } catch (error) {
-      console.error("Erro ao processar aluguel:", error);
-      alert("Erro ao processar o aluguel. Tente novamente.");
-    }
-  };
+    // Adiciona notificação
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    notifications.unshift({
+      id: Date.now(),
+      text: `🚗 ${vehicle.brand} ${vehicle.model} adicionado ao carrinho`,
+      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    });
+    localStorage.setItem('notifications', JSON.stringify(notifications.slice(0, 20)));
+
+    setIsAdded(true);
+  } catch (error) {
+    console.error("Erro ao processar aluguel:", error);
+    alert("Erro ao processar o aluguel. Tente novamente.");
+  }
+};
 
   if (loading) return (
     <div className="flex h-screen items-center justify-center font-bold text-gray-500 animate-pulse uppercase tracking-widest">
