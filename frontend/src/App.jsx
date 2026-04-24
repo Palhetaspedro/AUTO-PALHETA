@@ -12,7 +12,6 @@ import Login from './pages/Login';
 import Vehicles from './pages/Vehicles';
 import VehicleDetail from './pages/VehicleDetail';
 import Notifications from './pages/Notifications';
-import Chat from './pages/Chat';
 import License from './pages/License';
 import Favourites from './pages/Favourites'; 
 import Recents from './pages/Recents';
