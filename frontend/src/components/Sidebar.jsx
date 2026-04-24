@@ -3,8 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { account, client } from '../lib/appwrite';
 import { useState, useEffect, useRef } from 'react';
 
-// importanto a logo do carro para o sidebar
-import carLogo from '../assets/jdm_car_illustration.jpg';
 
 export default function Sidebar({ onOpenAdmin }) {
   const location = useLocation();
@@ -81,7 +79,7 @@ export default function Sidebar({ onOpenAdmin }) {
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
           <div className="relative flex items-center justify-center w-12 h-12 bg-black rounded-xl shadow-lg shrink-0 overflow-hidden">
             <img
-              src={carLogo}
+              src="/jdm_car_illustration.jpg"
               alt="Auto Ultimate Logo"
               className="w-full h-full object-cover scale-150 object-center"
             />
