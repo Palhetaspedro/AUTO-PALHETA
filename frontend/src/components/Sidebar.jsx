@@ -3,6 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { account, client } from '../lib/appwrite';
 import { useState, useEffect, useRef } from 'react';
 
+// importanto a logo do carro para o sidebar
+import carLogo from '../assets/jdm_car_illustration.jpg';
+
 export default function Sidebar({ onOpenAdmin }) {
   const location = useLocation();
   const [cartCount, setCartCount] = useState(0);
@@ -78,10 +81,11 @@ export default function Sidebar({ onOpenAdmin }) {
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
           <div className="relative flex items-center justify-center w-12 h-12 bg-black rounded-xl shadow-lg shrink-0 overflow-hidden">
             <img
-              src="/jdm_car_illustration.jpg"
+              src={carLogo}
               alt="Auto Ultimate Logo"
               className="w-full h-full object-cover scale-150 object-center"
             />
+
           </div>
         </div>
         <div className="flex flex-col">
@@ -125,8 +129,8 @@ export default function Sidebar({ onOpenAdmin }) {
         <button
           onClick={() => setShowNotifications(!showNotifications)}
           className={`w-full group flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 relative border ${showNotifications
-              ? 'bg-black text-white shadow-xl border-black scale-[1.02]'
-              : 'text-gray-600 hover:bg-white hover:shadow-md border-transparent hover:border-gray-100'
+            ? 'bg-black text-white shadow-xl border-black scale-[1.02]'
+            : 'text-gray-600 hover:bg-white hover:shadow-md border-transparent hover:border-gray-100'
             }`}
         >
           <Bell className={`w-5 h-5 ${showNotifications ? 'text-white' : 'text-blue-600'}`} strokeWidth={1.5} />
