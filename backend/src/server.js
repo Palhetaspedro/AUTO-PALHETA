@@ -10,7 +10,7 @@ const { databases } = require(appwritePath);
 const app = express();
 
 // O Northflank injeta a variável PORT automaticamente
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando com sucesso na porta ${PORT}`);
