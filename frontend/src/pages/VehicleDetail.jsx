@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2, Fuel, Calendar, Settings, CheckCircle2, Box, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
-import { useAdmin } from '../hooks/useAdmin';
+import { useAdmin } from '../../hooks/useAdmin';
 
 export default function VehicleDetail({ user }) {
   const { id } = useParams();
