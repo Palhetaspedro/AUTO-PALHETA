@@ -12,11 +12,11 @@ export default function VehicleDetail({ user }) {
   const [deleting, setDeleting] = useState(false);
 
   // Usa a variável da Vercel ou o link direto do Northflank como fallback
+  
   const API_URL = import.meta.env.VITE_API_URL || "https://palheta--auto-ultimatebackend--jyc2t58tq8fd.code.run";
-
   const isAdmin = user?.email === "palhetapedro@gmail.com";
   const bgUrl = "https://images.unsplash.com/photo-1518306727298-4c17e1bf6942?q=80&w=736&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
-
+  console.log("API_URL:", API_URL);
   useEffect(() => {
   const fetchVehicle = async () => {
     try {

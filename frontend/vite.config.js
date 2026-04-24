@@ -7,4 +7,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  
+  server: {
+  proxy: {
+    '/api': {
+      target: 'https://sua-api.com',
+      changeOrigin: true,
+    }
+  }
+}
 })
