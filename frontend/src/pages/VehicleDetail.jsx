@@ -154,8 +154,12 @@ export default function VehicleDetail({ user }) {
                   <div>
                     <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Transmissão</p>
                     <p className="font-bold text-lg">
-                      {/* Verifica 'Transmission' (com T maiúsculo como no seu print) */}
-                      {vehicle.Transmission || 'Não inf.'}
+                      {(() => {
+                        const trans = vehicle.Transmission?.toLowerCase(); // Lê do banco (T maiúsculo)
+                        if (trans === 'automatic') return 'Automático';
+                        if (trans === 'manual') return 'Manual';
+                        return vehicle.Transmission || 'Não inf.';
+                      })()}
                     </p>
                   </div>
                 </div>

@@ -179,7 +179,7 @@ export default function AddVehicleModal({ isOpen, onClose, onRefresh, vehicle = 
                 <Settings size={10} /> Transmissão
               </label>
               <select className="bg-gray-100 p-3.5 rounded-2xl outline-none border-2 border-transparent focus:border-black font-bold text-sm cursor-pointer" value={formData.Transmission} onChange={e => setFormData({ ...formData, Transmission: e.target.value })}>
-                <option value="Automatic">Automática</option>
+                <option value="Automatic">Automático</option>
                 <option value="Manual">Manual</option>
               </select>
             </div>
