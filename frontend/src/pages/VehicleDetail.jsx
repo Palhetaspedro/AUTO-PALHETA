@@ -23,7 +23,7 @@ export default function VehicleDetail({ user }) {
         const response = await axios.get(`${API_URL}/api/vehicles`);
         // Ajuste na comparação de IDs (String com String)
         const found = response.data.find(v => String(v.$id || v.id) === String(id));
-        
+
         if (found) {
           setVehicle(found);
         } else {
@@ -54,7 +54,7 @@ export default function VehicleDetail({ user }) {
   };
 
   const handleRentNow = async () => {
-    if (!vehicle || vehicle.stock <= 0) return; 
+    if (!vehicle || vehicle.stock <= 0) return;
     try {
       const saleData = {
         vehicleId: vehicle.$id || vehicle.id,
@@ -102,7 +102,7 @@ export default function VehicleDetail({ user }) {
                 className={`w-full h-full object-cover transition-all duration-700 ${vehicle.stock <= 0 ? 'grayscale opacity-50' : 'opacity-100'}`}
               />
               {isAdmin && (
-                <button 
+                <button
                   onClick={handleDelete}
                   disabled={deleting}
                   className="absolute top-6 right-6 p-4 bg-white/80 hover:bg-red-500 hover:text-white backdrop-blur-md text-red-500 rounded-2xl shadow-xl transition-all duration-300 opacity-0 group-hover:opacity-100"
@@ -125,36 +125,48 @@ export default function VehicleDetail({ user }) {
               {/* GRID DE INFORMAÇÕES (Ano, Combustível, Transmissão e Estoque) */}
               <div className="grid grid-cols-2 gap-4 mb-10">
                 <div className="bg-white/80 p-6 rounded-[32px] flex items-center gap-4 border border-white shadow-sm">
-                    <div className="bg-blue-100 text-blue-600 p-3 rounded-2xl"><Calendar size={22} /></div>
-                    <div>
-                        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Ano</p>
-                        <p className="font-bold text-lg">{vehicle.year}</p>
-                    </div>
+                  <div className="bg-blue-100 text-blue-600 p-3 rounded-2xl"><Calendar size={22} /></div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Ano</p>
+                    <p className="font-bold text-lg">{vehicle.year}</p>
+                  </div>
                 </div>
                 <div className="bg-white/80 p-6 rounded-[32px] flex items-center gap-4 border border-white shadow-sm">
-                    <div className="bg-orange-100 text-orange-600 p-3 rounded-2xl"><Fuel size={22} /></div>
-                    <div>
-                        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Combustível</p>
-                        <p className="font-bold text-lg">{vehicle.fuel_type}</p>
-                    </div>
+                  <div className="bg-orange-100 text-orange-600 p-3 rounded-2xl"><Fuel size={22} /></div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Combustível</p>
+                    <p className="font-bold text-lg">
+                      {/* Lógica de Tradução Visual */}
+                      {(() => {
+                        const fuel = vehicle.fuel_type?.toLowerCase(); // Padroniza para evitar erro de maiúscula
+                        if (fuel === 'etc') return 'Híbrido';
+                        if (fuel === 'electric') return 'Elétrico';
+                        if (fuel === 'gasoline') return 'Gasolina';
+                        return vehicle.fuel_type; // Se for outro (Diesel, etc), mostra o que está no banco
+                      })()}
+                    </p>
+                  </div>
                 </div>
-                
+
                 {/* TRANSMISSÃO */}
                 <div className="bg-white/80 p-6 rounded-[32px] flex items-center gap-4 border border-white shadow-sm">
-                    <div className="bg-purple-100 text-purple-600 p-3 rounded-2xl"><Settings size={22} /></div>
-                    <div>
-                        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Transmissão</p>
-                        <p className="font-bold text-lg">{vehicle.transmission || 'N/A'}</p>
-                    </div>
+                  <div className="bg-purple-100 text-purple-600 p-3 rounded-2xl"><Settings size={22} /></div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Transmissão</p>
+                    <p className="font-bold text-lg">
+                      {/* Verifica 'Transmission' (com T maiúsculo como no seu print) */}
+                      {vehicle.Transmission || 'Não inf.'}
+                    </p>
+                  </div>
                 </div>
 
                 {/* ESTOQUE */}
                 <div className="bg-white/80 p-6 rounded-[32px] flex items-center gap-4 border border-white shadow-sm">
-                    <div className="bg-green-100 text-green-600 p-3 rounded-2xl"><Box size={22} /></div>
-                    <div>
-                        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Em Estoque</p>
-                        <p className="font-bold text-lg">{vehicle.stock} unidades</p>
-                    </div>
+                  <div className="bg-green-100 text-green-600 p-3 rounded-2xl"><Box size={22} /></div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Em Estoque</p>
+                    <p className="font-bold text-lg">{vehicle.stock} unidades</p>
+                  </div>
                 </div>
               </div>
 
@@ -171,9 +183,8 @@ export default function VehicleDetail({ user }) {
                     <button
                       onClick={handleRentNow}
                       disabled={vehicle.stock <= 0}
-                      className={`w-full sm:w-auto px-10 py-5 rounded-[24px] font-black uppercase tracking-tighter transition-all ${
-                        vehicle.stock > 0 ? "bg-white text-black hover:bg-zinc-200" : "bg-zinc-800 text-zinc-600 pointer-events-none"
-                      }`}
+                      className={`w-full sm:w-auto px-10 py-5 rounded-[24px] font-black uppercase tracking-tighter transition-all ${vehicle.stock > 0 ? "bg-white text-black hover:bg-zinc-200" : "bg-zinc-800 text-zinc-600 pointer-events-none"
+                        }`}
                     >
                       {vehicle.stock > 0 ? "Alugar Agora" : "Esgotado"}
                     </button>
