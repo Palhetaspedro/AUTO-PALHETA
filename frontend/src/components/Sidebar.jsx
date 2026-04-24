@@ -79,7 +79,7 @@ export default function Sidebar({ onOpenAdmin }) {
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
           <div className="relative flex items-center justify-center w-12 h-12 bg-black rounded-xl shadow-lg shrink-0 overflow-hidden">
             <img
-              src="/jdm_car_illustration.jpg"
+              src="/CarVelocity.jpg"
               alt="Auto Ultimate Logo"
               className="w-full h-full object-cover scale-150 object-center"
             />
