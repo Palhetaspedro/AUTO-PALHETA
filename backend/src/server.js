@@ -3,10 +3,8 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
-const { databases, ID } = require(appwritePath);
-// Procura o arquivo appwrite.js na pasta config
 const appwritePath = path.resolve(__dirname, './config/appwrite');
-const { databases } = require(appwritePath);
+const { databases, ID } = require(appwritePath);
 
 const app = express();
 
@@ -48,7 +46,7 @@ app.post('/api/sales', async (req, res) => {
     const result = await databases.createDocument(
       process.env.APPWRITE_DATABASE_ID,
       'sales_coll',
-      'ID.unique()',
+      ID.unique(),
       {
         transactionId: String(Date.now()), // ID temporal para evitar erro de campo vazio
         salesPersonId: 'sistema_web',
