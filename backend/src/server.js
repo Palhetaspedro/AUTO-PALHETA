@@ -10,8 +10,11 @@ const { databases } = require(appwritePath);
 const app = express();
 
 // O Northflank injeta a variável PORT automaticamente
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor rodando com sucesso na porta ${PORT}`);
+});
 // Configuração de CORS aberta para o seu Frontend conseguir acessar
 app.use(cors({
  origin: '*', 
