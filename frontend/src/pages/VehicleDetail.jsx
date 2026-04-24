@@ -11,7 +11,7 @@ export default function VehicleDetail({ user }) {
   const [isAdded, setIsAdded] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Usa a variável da Vercel ou o link direto do Northflank como fallback
+  // URL da API (Ajustada para o seu Northflank)
   const API_URL = import.meta.env.VITE_API_URL || "https://palheta--auto-ultimatebackend--jyc2t58tq8fd.code.run";
 
   const isAdmin = user?.email === "palhetapedro@gmail.com";
@@ -20,9 +20,10 @@ export default function VehicleDetail({ user }) {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        // Buscando da API correta no Northflank
         const response = await axios.get(`${API_URL}/api/vehicles`);
-        const found = response.data.find(v => (v.$id === id || v.id === id));
+        // Ajuste na comparação de IDs (String com String)
+        const found = response.data.find(v => String(v.$id || v.id) === String(id));
+        
         if (found) {
           setVehicle(found);
         } else {
@@ -66,11 +67,10 @@ export default function VehicleDetail({ user }) {
       setIsAdded(true);
     } catch (error) {
       console.error("Erro ao processar aluguel:", error);
-      setIsAdded(true); // Mantido conforme seu original
+      alert("Erro ao processar o aluguel. Tente novamente.");
     }
   };
 
-  // ... (restante do seu código de retorno visual permanece igual)
   if (loading) return (
     <div className="flex h-screen items-center justify-center font-bold text-gray-500 animate-pulse uppercase tracking-widest">
       Carregando detalhes do veículo...
@@ -122,6 +122,7 @@ export default function VehicleDetail({ user }) {
                 </h1>
               </div>
 
+              {/* GRID DE INFORMAÇÕES (Ano, Combustível, Transmissão e Estoque) */}
               <div className="grid grid-cols-2 gap-4 mb-10">
                 <div className="bg-white/80 p-6 rounded-[32px] flex items-center gap-4 border border-white shadow-sm">
                     <div className="bg-blue-100 text-blue-600 p-3 rounded-2xl"><Calendar size={22} /></div>
@@ -135,6 +136,24 @@ export default function VehicleDetail({ user }) {
                     <div>
                         <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Combustível</p>
                         <p className="font-bold text-lg">{vehicle.fuel_type}</p>
+                    </div>
+                </div>
+                
+                {/* TRANSMISSÃO */}
+                <div className="bg-white/80 p-6 rounded-[32px] flex items-center gap-4 border border-white shadow-sm">
+                    <div className="bg-purple-100 text-purple-600 p-3 rounded-2xl"><Settings size={22} /></div>
+                    <div>
+                        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Transmissão</p>
+                        <p className="font-bold text-lg">{vehicle.transmission || 'N/A'}</p>
+                    </div>
+                </div>
+
+                {/* ESTOQUE */}
+                <div className="bg-white/80 p-6 rounded-[32px] flex items-center gap-4 border border-white shadow-sm">
+                    <div className="bg-green-100 text-green-600 p-3 rounded-2xl"><Box size={22} /></div>
+                    <div>
+                        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Em Estoque</p>
+                        <p className="font-bold text-lg">{vehicle.stock} unidades</p>
                     </div>
                 </div>
               </div>
@@ -156,13 +175,13 @@ export default function VehicleDetail({ user }) {
                         vehicle.stock > 0 ? "bg-white text-black hover:bg-zinc-200" : "bg-zinc-800 text-zinc-600 pointer-events-none"
                       }`}
                     >
-                      Alugar Agora
+                      {vehicle.stock > 0 ? "Alugar Agora" : "Esgotado"}
                     </button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center text-center py-4">
                     <CheckCircle2 size={48} className="text-green-400 mb-4" />
-                    <h3 className="text-2xl font-black italic">ADICIONADO!</h3>
+                    <h3 className="text-2xl font-black italic">SOLICITAÇÃO ENVIADA!</h3>
                     <button onClick={() => navigate('/dashboard')} className="mt-6 bg-white text-black px-12 py-4 rounded-2xl font-black uppercase tracking-tighter">
                       Voltar para a Vitrine
                     </button>
