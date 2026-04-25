@@ -127,48 +127,41 @@ export default function Cart({ user }) {
       </div>
     );
   }
-  if (paymentStep === 'checkout') {
-  // Calculamos o total antes para evitar erro de referência na UI
-  const totalGeral = cartItems.reduce((acc, item) => acc + Number(item.price || item.price_per_hour), 0);
-
-  return (
-    <div className="p-8 max-w-md mx-auto bg-white rounded-[3rem] shadow-xl border border-gray-50 mt-10 text-center">
-      <CreditCard className="mx-auto text-blue-600 mb-4" size={40} />
-      <h2 className="text-2xl font-black italic mb-6 uppercase tracking-tighter">Pagamento Seguro</h2>
-      
-      <div className="space-y-4 text-left">
-        <div>
-          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Número do Cartão</label>
-          <input 
-            type="text" 
-            placeholder="4242 4242 4242 4242" 
-            className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500 font-mono"
-            onChange={(e) => setCardData({...cardData, number: e.target.value})}
-          />
+ if (paymentStep === 'checkout') {
+    const totalGeral = cartItems.reduce((acc, item) => acc + Number(item.price || item.price_per_hour), 0);
+    
+    return (
+      <div className="p-8 max-w-md mx-auto bg-white rounded-[3rem] shadow-xl border border-gray-50 mt-10">
+        <div className="flex justify-center mb-6 text-blue-600">
+          <CreditCard size={40} />
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <input type="text" placeholder="MM/AA" className="w-full p-4 bg-gray-50 rounded-2xl border-none" />
-          <input type="text" placeholder="CVC" className="w-full p-4 bg-gray-50 rounded-2xl border-none" />
+        <h2 className="text-2xl font-black italic mb-6 uppercase tracking-tighter text-center">Pagamento Simulado</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Cartão (Simulação)</label>
+            <input 
+              type="text" 
+              placeholder="4242 4242 4242 4242" 
+              className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500 font-mono"
+              onChange={(e) => setCardData({...cardData, number: e.target.value})}
+            />
+          </div>
+          <button 
+            onClick={handleCheckout} 
+            className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg"
+          >
+            Confirmar US$ {formatPrice(totalGeral)}
+          </button>
+          <button 
+            onClick={() => setPaymentStep('cart')} 
+            className="w-full text-gray-400 text-[10px] font-black uppercase tracking-widest"
+          >
+            Voltar ao Carrinho
+          </button>
         </div>
-
-        <button 
-          onClick={handleCheckout} 
-          className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 mt-4"
-        >
-          Confirmar US$ {formatPrice(totalGeral)}
-        </button>
-
-        <button 
-          onClick={() => setPaymentStep('cart')} 
-          className="w-full text-gray-400 text-[10px] font-black uppercase tracking-widest hover:text-black transition-colors"
-        >
-          Cancelar e voltar
-        </button>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   if (paymentStep === 'success') {
     return (
