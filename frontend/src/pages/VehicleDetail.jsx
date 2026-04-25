@@ -113,8 +113,8 @@ export default function VehicleDetail({ user }) {
   };
 
   return (
-    <div className="w-full" style={{ background: 'rgba(255,255,255,0.85)' }}>
-  <div className="w-full pb-32 md:pb-0">
+   <div className="w-full min-h-screen bg-gray-100 md:bg-cover md:bg-center md:bg-fixed" style={{ backgroundImage: window.innerWidth >= 768 ? `url(${bgUrl})` : 'none' }}>
+   <div className="w-full min-h-screen bg-white/70 md:backdrop-blur-md pb-32 md:pb-0">
         <div className="max-w-6xl mx-auto p-4 lg:p-8">
 
           <div className="flex justify-between items-center mb-6">
