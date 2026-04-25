@@ -30,7 +30,7 @@ Desenvolvida com foco em UI/UX moderna, controle de acesso por perfil e responsi
 ## 📸 Capturas de Tela
 
 ### Dashboard — Vitrine da Frota
-![Dashboard](assets/Dashboard Cars.png)
+![Dashboard](assets/DashboardCars.png)
 
 ### Detalhe do Veículo
 ![Detalhe do Veículo](assets/VehicleDetal.png)
