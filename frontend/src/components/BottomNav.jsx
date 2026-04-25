@@ -11,14 +11,20 @@ export default function BottomNav({ onOpenAdmin }) {
   const [notifCount, setNotifCount] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      setCartCount(cart.length);
-      const notifs = JSON.parse(localStorage.getItem('notifications') || '[]');
-      setNotifCount(notifs.length);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  // Leitura inicial imediata
+  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  setCartCount(cart.length);
+  const notifs = JSON.parse(localStorage.getItem('notifications') || '[]');
+  setNotifCount(notifs.length);
+
+  const interval = setInterval(() => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    setCartCount(cart.length);
+    const notifs = JSON.parse(localStorage.getItem('notifications') || '[]');
+    setNotifCount(notifs.length);
+  }, 1000);
+  return () => clearInterval(interval);
+}, []);
 
   const isActive = (path) => location.pathname === path;
 
