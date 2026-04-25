@@ -30,17 +30,17 @@ Desenvolvida com foco em UI/UX moderna, controle de acesso por perfil e responsi
 ## 📸 Capturas de Tela
 
 ### Dashboard — Vitrine da Frota
-![Dashboard](screenshot-dashboard.png)
+![Dashboard](screenshot-DashboardCars.png)
 
 ### Detalhe do Veículo
-![Detalhe do Veículo](screenshot-detail.png)
+![Detalhe do Veículo](screenshot-VehicleDetal.png)
 
 ### Dashboard Financeiro & Gráficos de Vendas
-![Financeiro](screenshot-financeiro.png)
+![Financeiro](screenshot-SalesStatus.png)
 
 ### 📱 Versão Mobile
 <div align="center">
-  <img src="screenshot-mobile.jpeg" width="300" alt="Mobile" />
+  <img src="screenshot-MobileScreenshot.jpeg" width="300" alt="Mobile" />
 </div>
 
 ---
