@@ -128,36 +128,42 @@ export default function Cart({ user }) {
     );
   }
   if (paymentStep === 'checkout') {
+  // Calculamos o total antes para evitar erro de referência na UI
+  const totalGeral = cartItems.reduce((acc, item) => acc + Number(item.price || item.price_per_hour), 0);
+
   return (
-    <div className="p-8 max-w-md mx-auto bg-white rounded-[3rem] shadow-xl border border-gray-50 mt-10">
-      <h2 className="text-2xl font-black italic mb-6 uppercase tracking-tighter">Detalhes do Pagamento</h2>
-      <div className="space-y-4">
+    <div className="p-8 max-w-md mx-auto bg-white rounded-[3rem] shadow-xl border border-gray-50 mt-10 text-center">
+      <CreditCard className="mx-auto text-blue-600 mb-4" size={40} />
+      <h2 className="text-2xl font-black italic mb-6 uppercase tracking-tighter">Pagamento Seguro</h2>
+      
+      <div className="space-y-4 text-left">
         <div>
           <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Número do Cartão</label>
           <input 
-            type="text" placeholder="0000 0000 0000 0000" 
+            type="text" 
+            placeholder="4242 4242 4242 4242" 
             className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500 font-mono"
             onChange={(e) => setCardData({...cardData, number: e.target.value})}
           />
         </div>
+
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Validade</label>
-            <input type="text" placeholder="MM/AA" className="w-full p-4 bg-gray-50 rounded-2xl border-none" />
-          </div>
-          <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">CVC</label>
-            <input type="text" placeholder="123" className="w-full p-4 bg-gray-50 rounded-2xl border-none" />
-          </div>
+          <input type="text" placeholder="MM/AA" className="w-full p-4 bg-gray-50 rounded-2xl border-none" />
+          <input type="text" placeholder="CVC" className="w-full p-4 bg-gray-50 rounded-2xl border-none" />
         </div>
+
         <button 
-          onClick={handleCheckout} // Agora o botão de checkout real chama a gravação no Appwrite
-          className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-colors mt-4"
+          onClick={handleCheckout} 
+          className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 mt-4"
         >
-          Confirmar Pagamento US$ {formatPrice(cartItems.reduce((acc, item) => acc + Number(item.price || item.price_per_hour), 0))}
+          Confirmar US$ {formatPrice(totalGeral)}
         </button>
-        <button onClick={() => setPaymentStep('cart')} className="w-full text-gray-400 text-[10px] font-black uppercase tracking-widest">
-          Voltar ao Carrinho
+
+        <button 
+          onClick={() => setPaymentStep('cart')} 
+          className="w-full text-gray-400 text-[10px] font-black uppercase tracking-widest hover:text-black transition-colors"
+        >
+          Cancelar e voltar
         </button>
       </div>
     </div>
