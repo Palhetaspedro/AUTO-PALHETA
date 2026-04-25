@@ -2,7 +2,7 @@
 
 <img src="https://img.shields.io/badge/AUTO-ULTIMATE-000000?style=for-the-badge&logoColor=white" alt="Auto Ultimate" />
 
-# 🚗 AUTO ULTIMATE
+#  AUTO ULTIMATE
 ### Sistema de Gestão e Aluguel de Frota Premium
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -181,7 +181,7 @@ sequenceDiagram
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/auto-ultimate.git
+git clone https://github.com/Palhetaspedro/auto-ultimate.git
 
 # Entre na pasta do frontend
 cd frontend
@@ -241,7 +241,7 @@ PORT=3001
 O sistema utiliza o campo `role` nas preferências do usuário no Appwrite para diferenciar os perfis:
 
 ```json
-{ "role": "admin" }
+{ "role": "admin", "user" }
 ```
 
 O hook `useAdmin` verifica esse campo em tempo real e controla a visibilidade dos elementos exclusivos do gerente (Painel Admin, botão de excluir veículo).
@@ -276,8 +276,8 @@ auto-ultimate/
 **Pedro Palheta**  
 Desenvolvedor Full Stack
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/seu-perfil)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/seu-usuario)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)]((https://www.linkedin.com/in/pedro-palheta-b81017321/))
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)]((https://github.com/Palhetaspedro))
 
 </div>
 
