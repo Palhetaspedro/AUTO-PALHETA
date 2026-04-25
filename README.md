@@ -15,7 +15,7 @@
 **Plataforma web fullstack para gestão interna de frota de veículos premium de uma concessionária.**  
 Desenvolvida com foco em UI/UX moderna, controle de acesso por perfil e responsividade total.
 
-## 🔑 Acesso para Demo
+##  Acesso para Demo
 
 | Perfil | E-mail | Senha |
 |--------|--------|-------|
@@ -27,7 +27,7 @@ Desenvolvida com foco em UI/UX moderna, controle de acesso por perfil e responsi
 
 ---
 
-## 📸 Capturas de Tela
+##  Capturas de Tela
 
 ### Dashboard — Vitrine da Frota
 ![Dashboard](assets/DashboardCars.png)
@@ -38,14 +38,14 @@ Desenvolvida com foco em UI/UX moderna, controle de acesso por perfil e responsi
 ### Dashboard Financeiro & Gráficos de Vendas
 ![Financeiro](assets/SalesStatus.png)
 
-### 📱 Versão Mobile
+###  Versão Mobile
 <div align="center">
   <img src="assets/MobileScreenshot.jpeg" width="300" alt="Mobile" />
 </div>
 
 ---
 
-## 💡 Sobre o Projeto
+##  Sobre o Projeto
 
 O **Auto Ultimate** é um sistema web desenvolvido para concessionárias de veículos premium, permitindo que **funcionários** e **gerentes** gerenciem a frota de forma eficiente e intuitiva.
 
@@ -53,28 +53,28 @@ O sistema conta com dois perfis de acesso distintos, interface responsiva para d
 
 ---
 
-## ✨ Funcionalidades
+##  Funcionalidades
 
 ### 👤 Funcionário
-- 🔐 Login e autenticação segura via Appwrite
-- 🚗 Visualização da frota com filtros por tipo, combustível e transmissão
-- 🔍 Busca de veículos em tempo real
-- 📋 Página de detalhes do veículo (ano, combustível, transmissão, estoque)
-- 🛒 Carrinho de aluguel com resumo e finalização de pagamento
-- ⭐ Avaliação de experiência após o aluguel (1 a 5 estrelas)
-- 🔔 Notificações em tempo real de ações realizadas
-- 📊 Visualização de gráficos e estatísticas de vendas
-- 📱 Interface responsiva com bottom navigation no mobile
+-  Login e autenticação segura via Appwrite
+-  Visualização da frota com filtros por tipo, combustível e transmissão
+-  Busca de veículos em tempo real
+-  Página de detalhes do veículo (ano, combustível, transmissão, estoque)
+-  Carrinho de aluguel com resumo e finalização de pagamento
+-  Avaliação de experiência após o aluguel (1 a 5 estrelas)
+-  Notificações em tempo real de ações realizadas
+-  Visualização de gráficos e estatísticas de vendas
+-  Interface responsiva com bottom navigation no mobile
 
 ### 🛡️ Gerente (Administrador) — herda tudo do Funcionário
-- ➕ Adicionar novos veículos à frota com upload de imagem
-- ✏️ Editar informações de veículos existentes
-- 🗑️ Excluir veículos da frota
-- 🔒 Painel Admin exclusivo (invisível para funcionários)
+-  Adicionar novos veículos à frota com upload de imagem
+-  Editar informações de veículos existentes
+-  Excluir veículos da frota
+-  Painel Admin exclusivo (invisível para funcionários)
 
 ---
 
-## 🏗️ Arquitetura
+##  Arquitetura
 
 ```
 AUTO ULTIMATE
@@ -99,7 +99,7 @@ AUTO ULTIMATE
 
 ---
 
-## 📊 Diagrama UML
+##  Diagrama UML
 
 ### Hierarquia de Permissões
 
@@ -157,7 +157,7 @@ sequenceDiagram
 
 ---
 
-## 🛠️ Stack Tecnológica
+##  Stack Tecnológica
 
 | Camada | Tecnologia | Função |
 |--------|-----------|--------|
@@ -170,7 +170,7 @@ sequenceDiagram
 
 ---
 
-## 🚀 Como Rodar Localmente
+##  Como Rodar Localmente
 
 ### Pré-requisitos
 - Node.js 18+
@@ -216,7 +216,7 @@ npm start
 
 ---
 
-## 🔐 Variáveis de Ambiente
+##  Variáveis de Ambiente
 
 ### Frontend (`.env`)
 ```env
@@ -236,7 +236,7 @@ PORT=3001
 
 ---
 
-## 👤 Controle de Acesso
+##  Controle de Acesso
 
 O sistema utiliza o campo `role` nas preferências do usuário no Appwrite para diferenciar os perfis:
 
@@ -248,7 +248,7 @@ O hook `useAdmin` verifica esse campo em tempo real e controla a visibilidade do
 
 ---
 
-## 📁 Estrutura de Pastas
+##  Estrutura de Pastas
 
 ```
 auto-ultimate/
@@ -269,7 +269,7 @@ auto-ultimate/
 
 ---
 
-## 🧑‍💻 Autor
+##  Autor
 
 <div align="center">
 
