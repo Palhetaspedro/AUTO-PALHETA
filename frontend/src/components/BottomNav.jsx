@@ -61,7 +61,7 @@ export default function BottomNav({ onOpenAdmin }) {
           {notifCount > 0 && (
             <span className="absolute -top-1 right-1 bg-red-500 w-2 h-2 rounded-full animate-ping" />
           )}
-          <span className={`text-[9px] font-black uppercase tracking-wider ${isActive('/notifications') ? 'text-black' : ''}`}>Alertas</span>
+          <span className={`text-[9px] font-black uppercase tracking-wider ${isActive('/notifications') ? 'text-black' : ''}`}>Notificações</span>
         </Link>
 
         <Link to="/sales-stats" className={`flex flex-col items-center gap-1 px-3 py-1 rounded-2xl transition-all ${isActive('/sales-stats') ? 'text-black' : 'text-gray-400'}`}>
