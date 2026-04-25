@@ -4,8 +4,9 @@ import { databases, DATABASE_ID } from '../lib/appwrite';
 import { ID } from 'appwrite';
 
 export default function Cart({ user }) { 
+  const [cartItems, setCartItems] = useState([]);
   const [paymentStep, setPaymentStep] = useState('cart');
-  const [cardData, setCardData] = useState({ number: '', cvc: '', name: '' }); // Novo estado
+  const [cardData, setCardData] = useState({ number: '', cvc: '', name: '' });
   const [rating, setRating] = useState(0);
   const [loading, setLoading] = useState(false);
   const [rentedDocIds, setRentedDocIds] = useState([]); 
@@ -86,7 +87,7 @@ export default function Cart({ user }) {
       setRentedDocIds(newDocIds);
       localStorage.removeItem('cart');
       setCartItems([]);
-      addNotification(`✅ Aluguel finalizado com sucesso!`); // NOTIFICAÇÃO
+      addNotification(`✅ Aluguel finalizado com sucesso!`);
       setPaymentStep('success');
       
     } catch (error) {
@@ -127,7 +128,8 @@ export default function Cart({ user }) {
       </div>
     );
   }
- if (paymentStep === 'checkout') {
+
+  if (paymentStep === 'checkout') {
     const totalGeral = cartItems.reduce((acc, item) => acc + Number(item.price || item.price_per_hour), 0);
     
     return (
