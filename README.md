@@ -40,7 +40,7 @@ Desenvolvida com foco em UI/UX moderna, controle de acesso por perfil e responsi
 
 ### 📱 Versão Mobile
 <div align="center">
-  <img src="assets/Mobile Screenshot.jpeg" width="300" alt="Mobile" />
+  <img src="assets/MobileScreenshot.jpeg" width="300" alt="Mobile" />
 </div>
 
 ---
