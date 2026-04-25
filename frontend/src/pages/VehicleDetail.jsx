@@ -113,8 +113,8 @@ export default function VehicleDetail({ user }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-cover bg-center bg-fixed pb-24 md:pb-0" style={{ backgroundImage: `url(${bgUrl})` }}>
-      <div className="min-h-screen w-full bg-white/70 backdrop-blur-md">
+    <div className="min-h-screen w-full bg-cover bg-center bg-fixed" style={{ backgroundImage: `url(${bgUrl})` }}>
+      <div className="min-h-full w-full bg-white/70 backdrop-blur-md pb-32 md:pb-0">
         <div className="max-w-6xl mx-auto p-4 lg:p-8">
 
           <div className="flex justify-between items-center mb-6">
@@ -124,7 +124,7 @@ export default function VehicleDetail({ user }) {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-start">
-            
+
             {/* IMAGEM */}
             <div className="rounded-[32px] overflow-hidden bg-gray-100 shadow-2xl h-[220px] md:h-[400px] lg:h-[500px] relative border-4 border-white group">
               <img
@@ -168,7 +168,7 @@ export default function VehicleDetail({ user }) {
                   <div className="bg-orange-100 text-orange-600 p-2 rounded-xl shrink-0"><Fuel size={18} /></div>
                   <div className="min-w-0">
                     <p className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Combustível</p>
-                    <p className="font-bold text-base truncate">{fuelLabel()}</p>
+                    <p className="font-bold text-sm leading-tight">{fuelLabel()}</p>
                   </div>
                 </div>
 
@@ -176,7 +176,7 @@ export default function VehicleDetail({ user }) {
                   <div className="bg-purple-100 text-purple-600 p-2 rounded-xl shrink-0"><Settings size={18} /></div>
                   <div className="min-w-0">
                     <p className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Transmissão</p>
-                    <p className="font-bold text-base truncate">{transLabel()}</p>
+                    <p className="font-bold text-sm leading-tight">{transLabel()}</p>
                   </div>
                 </div>
 
@@ -190,7 +190,7 @@ export default function VehicleDetail({ user }) {
               </div>
 
               {/* PREÇO E BOTÃO */}
-              <div className="bg-zinc-900 p-6 lg:p-10 rounded-[36px] text-white shadow-2xl">
+              <div className="bg-zinc-900 p-6 lg:p-10 rounded-[36px] text-white shadow-2xl mb-6">
                 {!isAdded ? (
                   <div className="flex flex-col gap-4">
                     <div>
